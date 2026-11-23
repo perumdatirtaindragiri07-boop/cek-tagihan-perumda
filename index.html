@@ -1,1437 +1,1205 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CEK TAGIHAN AIR - PERUMDA TIRTA INDRAGIRI</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
-    <!-- Supabase JS Client v2 CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f7ff;
-            color: #0f172a;
-        }
-        .font-heading {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        /* Warna Khas PDAM */
-        .pdam-gradient {
-            background: linear-gradient(135deg, #004e92 0%, #0284c7 50%, #0ea5e9 100%);
-        }
-        .pdam-card-shadow {
-            box-shadow: 0 20px 40px -15px rgba(2, 132, 199, 0.25);
-        }
-        /* Animasi gelombang / tetesan air halus */
-        @keyframes floatLogo {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
-        }
-        .animate-float {
-            animation: floatLogo 3.5s ease-in-out infinite;
-        }
-        @keyframes pulseRing {
-            0% { transform: scale(0.95); opacity: 0.7; }
-            70% { transform: scale(1.08); opacity: 0; }
-            100% { transform: scale(0.95); opacity: 0; }
-        }
-        .pulse-ring::before {
-            content: '';
-            position: absolute;
-            inset: -8px;
-            border-radius: 9999px;
-            border: 3px solid #38bdf8;
-            animation: pulseRing 2.2s infinite;
-        }
-
-        /* Print CSS untuk Cetak Struk Tagihan */
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            #printable-bill, #printable-bill * {
-                visibility: visible;
-            }
-            #printable-bill {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                box-shadow: none !important;
-                border: 2px solid #0284c7 !important;
-                margin: 0 !important;
-                padding: 16px !important;
-            }
-            .no-print {
-                display: none !important;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CEK TAGIHAN AIR - PERUMDA TIRTA INDRAGIRI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #f0f6fc;
+    }
+    .pdam-gradient {
+      background: linear-gradient(135deg, #004e92 0%, #0077cc 55%, #00a8e8 100%);
+    }
+    .pdam-card-shadow {
+      box-shadow: 0 15px 35px -5px rgba(0, 82, 155, 0.15), 0 5px 15px -3px rgba(0, 82, 155, 0.08);
+    }
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); opacity: 0.7; }
+      70% { transform: scale(1.08); opacity: 0; }
+      100% { transform: scale(0.95); opacity: 0; }
+    }
+    .logo-pulse::before {
+      content: '';
+      position: absolute;
+      inset: -12px;
+      border-radius: 9999px;
+      border: 3px solid rgba(255, 255, 255, 0.55);
+      animation: pulseRing 2.4s infinite;
+    }
+    @media print {
+      body { background: #ffffff !important; }
+      .no-print { display: none !important; }
+      #screen-bill {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      #bill-paper {
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
+        max-width: 100% !important;
+      }
+    }
+  </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-sky-200 selection:text-sky-900">
+<body class="min-h-screen text-slate-800 antialiased selection:bg-sky-200 selection:text-sky-900">
 
-    <!-- ==================== NOTIFIKASI TOAST ==================== -->
-    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+  <!-- =========================================================
+       LAYAR 1: SPLASH SCREEN LOGO INSTANSI (KLIK UNTUK LANJUT)
+  ========================================================== -->
+  <section id="screen-splash" class="min-h-screen pdam-gradient flex flex-col items-center justify-center p-6 relative overflow-hidden text-white">
+    <div class="absolute -top-24 -left-24 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-32 -right-24 w-[28rem] h-[28rem] bg-sky-300/20 rounded-full blur-3xl pointer-events-none"></div>
 
-    <!-- ==================== 1. LAYAR PERTAMA (SPLASH SCREEN LOGO) ==================== -->
-    <section id="view-splash" class="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden pdam-gradient text-white">
-        <!-- Dekorasi Latar Belakang -->
-        <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-15">
-            <svg class="absolute -bottom-16 left-0 w-full h-72" viewBox="0 0 1440 320" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path fill="#ffffff" d="M0,192L60,186.7C120,181,240,171,360,181.3C480,192,600,224,720,218.7C840,213,960,171,1080,160C1200,149,1320,171,1380,181.3L1440,192L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>
-            </svg>
-            <div class="w-96 h-96 rounded-full bg-white/20 blur-3xl -top-20 -left-20 absolute"></div>
-            <div class="w-80 h-80 rounded-full bg-sky-300/20 blur-3xl bottom-10 right-10 absolute"></div>
+    <div class="relative z-10 flex flex-col items-center text-center max-w-md w-full">
+      <button onclick="goToSearch()" class="group relative flex flex-col items-center focus:outline-none cursor-pointer" title="Klik untuk Cek Tagihan Air">
+        <div class="relative logo-pulse w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-white shadow-2xl flex items-center justify-center p-4 transition-transform duration-300 group-hover:scale-105 group-active:scale-95 border-4 border-sky-200">
+          <img id="splash-logo-img" src="" alt="Logo Instansi" class="hidden w-full h-full object-contain rounded-full" />
+          <svg id="splash-logo-svg" viewBox="0 0 120 120" class="w-24 h-24 sm:w-28 sm:h-28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="dropGrad" x1="20" y1="10" x2="100" y2="110" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#00a8e8"/>
+                <stop offset="50%" stop-color="#0077cc"/>
+                <stop offset="100%" stop-color="#003f7d"/>
+              </linearGradient>
+            </defs>
+            <path d="M60 12C60 12 22 54.5 22 79C22 99.9868 39.0132 114 60 114C80.9868 114 98 99.9868 98 79C98 54.5 60 12 60 12Z" fill="url(#dropGrad)"/>
+            <path d="M35 82C43 75 53 75 60 82C67 89 77 89 85 82" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+            <path d="M40 94C47 89 54 89 60 94C66 99 73 99 80 94" stroke="#bae6fd" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="46" cy="56" r="5" fill="#ffffff" fill-opacity="0.75"/>
+          </svg>
         </div>
 
-        <!-- Konten Utama Splash Screen -->
-        <div class="relative z-10 max-w-lg w-full text-center flex flex-col items-center">
-            <!-- Area Logo Interaktif (Bisa Diklik) -->
-            <div onclick="navigateTo('view-search')" class="cursor-pointer group flex flex-col items-center">
-                <div class="relative mb-6 animate-float">
-                    <div class="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-white p-3 shadow-2xl flex items-center justify-center border-4 border-sky-200/80 group-hover:scale-105 transition-transform duration-300 pulse-ring">
-                        <!-- Custom Logo Image jika diatur Admin -->
-                        <img id="splash-logo-img" src="" alt="Logo Perumda Tirta Indragiri" class="hidden w-full h-full object-contain rounded-full" onerror="this.classList.add('hidden'); document.getElementById('splash-logo-svg').classList.remove('hidden');">
-                        <!-- Default SVG Logo Khas PDAM Tirta Indragiri -->
-                        <svg id="splash-logo-svg" class="w-28 h-28 sm:w-32 sm:h-32" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="60" cy="60" r="54" fill="#E0F2FE" stroke="#0284C7" stroke-width="4"/>
-                            <!-- Tetesan Air Utama -->
-                            <path d="M60 18C60 18 30 52 30 74C30 90.5685 43.4315 104 60 104C76.5685 104 90 90.5685 90 74C90 52 60 18 60 18Z" fill="url(#pdamWaterGrad)"/>
-                            <!-- Gelombang Putih di dalam air -->
-                            <path d="M35 74C43 68 52 79 60 74C68 69 77 79 85 74C84 89 73 99 60 99C47 99 36 89 35 74Z" fill="#FFFFFF" fill-opacity="0.9"/>
-                            <path d="M39 83C46 79 53 87 60 83C67 79 74 87 81 83C78 93 70 99 60 99C50 99 42 93 39 83Z" fill="#0369A1"/>
-                            <!-- Kilau Tetesan -->
-                            <ellipse cx="48" cy="52" rx="4" ry="9" transform="rotate(22 48 52)" fill="white" fill-opacity="0.6"/>
-                            <defs>
-                                <linearGradient id="pdamWaterGrad" x1="60" y1="18" x2="60" y2="104" gradientUnits="userSpaceOnUse">
-                                    <stop stop-color="#38BDF8"/>
-                                    <stop offset="0.55" stop-color="#0284C7"/>
-                                    <stop offset="1" stop-color="#1E3A8A"/>
-                                </linearGradient>
-                            </defs>
-                        </svg>
-                    </div>
-                </div>
-
-                <span class="inline-block px-4 py-1 rounded-full bg-white/15 backdrop-blur-sm text-sky-100 text-xs sm:text-sm font-semibold tracking-wider uppercase mb-3 border border-white/20">
-                    Kabupaten Indragiri Hilir
-                </span>
-
-                <h1 class="font-heading text-3xl sm:text-5xl font-extrabold tracking-tight text-white drop-shadow-md leading-tight">
-                    PERUMDA<br>TIRTA INDRAGIRI
-                </h1>
-
-                <p class="mt-3 text-sky-100 text-sm sm:text-base font-medium italic max-w-md">
-                    "SENYUM PELANGGAN ADALAH SENYUM KAMI JUGA"
-                </p>
-
-                <!-- Tombol Utama Masuk Cek Tagihan -->
-                <button type="button" class="mt-8 w-full sm:w-auto px-8 py-4 bg-white text-[#004e92] hover:bg-sky-50 active:scale-95 rounded-2xl font-extrabold text-base sm:text-lg shadow-xl transition-all duration-200 flex items-center justify-center gap-3 border-2 border-sky-200">
-                    <i class="fa-solid fa-file-invoice-dollar text-xl text-sky-600"></i>
-                    <span>KLIK UNTUK CEK TAGIHAN AIR</span>
-                    <i class="fa-solid fa-arrow-right text-sky-600 group-hover:translate-x-1 transition-transform"></i>
-                </button>
-            </div>
-
-            <p class="mt-5 text-xs text-sky-200/80">
-                Ketuk logo atau tombol di atas untuk memeriksa info rekening air Anda
-            </p>
+        <div class="mt-8 space-y-2">
+          <span class="inline-block px-3.5 py-1 rounded-full bg-white/15 backdrop-blur-sm text-xs font-semibold tracking-widest uppercase border border-white/25">
+            Layanan Informasi Pelanggan
+          </span>
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight drop-shadow-md">
+            PERUMDA TIRTA INDRAGIRI
+          </h1>
+          <p class="text-sky-100 text-sm sm:text-base font-medium">
+            Sistem Informasi Cek Tagihan Rekening Air
+          </p>
         </div>
 
-        <!-- Tombol Tersembunyi / Halus Khusus ADMIN di Pojok Kanan Bawah -->
-        <button onclick="openAdminAccess()" title="Akses Khusus Admin" class="fixed bottom-4 right-4 z-20 p-3 rounded-full bg-white/10 hover:bg-white/25 text-white/60 hover:text-white backdrop-blur-md transition-all border border-white/10 flex items-center gap-2 text-xs">
-            <i class="fa-solid fa-lock"></i>
-            <span class="hidden sm:inline">Admin</span>
+        <div class="mt-8 inline-flex items-center gap-2.5 bg-white text-[#00529b] font-bold px-7 py-3.5 rounded-full shadow-xl transition-all duration-300 group-hover:bg-sky-50 group-hover:shadow-2xl">
+          <span>KLIK UNTUK CEK TAGIHAN</span>
+          <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+          </svg>
+        </div>
+      </button>
+    </div>
+
+    <!-- Tombol Akses Khusus Admin -->
+    <button onclick="openAdminLogin()" class="no-print fixed bottom-5 right-5 z-20 flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-slate-900/35 hover:bg-slate-900/65 text-white/85 hover:text-white text-xs font-semibold backdrop-blur-md border border-white/15 transition cursor-pointer" title="Login Khusus Admin">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+      </svg>
+      <span>Admin</span>
+    </button>
+  </section>
+
+  <!-- =========================================================
+       LAYAR 2: FORM CEK TAGIHAN (HANYA MEMINTA NO. PDAM)
+  ========================================================== -->
+  <section id="screen-search" class="hidden min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 relative">
+    <div class="w-full max-w-md bg-white rounded-3xl pdam-card-shadow border border-sky-100 overflow-hidden">
+      <div class="pdam-gradient p-6 text-center text-white relative">
+        <button onclick="goToSplash()" class="absolute left-4 top-4 p-2 rounded-full bg-white/15 hover:bg-white/25 transition cursor-pointer" title="Kembali ke Layar Awal">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+          </svg>
         </button>
-    </section>
-
-    <!-- ==================== 2. LAYAR PENGECEKAN TAGIHAN (HANYA INPUT NO REGISTER) ==================== -->
-    <section id="view-search" class="hidden min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-b from-sky-50 via-white to-sky-100">
-        <div class="max-w-md w-full">
-            <!-- Tombol Kembali ke Layar Logo -->
-            <button onclick="navigateTo('view-splash')" class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-sky-700 hover:text-sky-900 bg-white px-4 py-2 rounded-xl shadow-sm border border-sky-100 transition">
-                <i class="fa-solid fa-arrow-left"></i>
-                <span>Kembali ke Halaman Awal</span>
-            </button>
-
-            <div class="bg-white rounded-3xl pdam-card-shadow border border-sky-100 overflow-hidden">
-                <!-- Header Mini Kop -->
-                <div class="pdam-gradient p-6 text-center text-white">
-                    <div class="w-16 h-16 mx-auto bg-white rounded-2xl p-2 shadow-md flex items-center justify-center mb-3">
-                        <img id="search-logo-img" src="" alt="Logo" class="hidden w-full h-full object-contain">
-                        <i id="search-logo-icon" class="fa-solid fa-droplet text-3xl text-sky-600"></i>
-                    </div>
-                    <h2 class="font-heading text-xl font-extrabold tracking-wide">PERUMDA TIRTA INDRAGIRI</h2>
-                    <p class="text-xs text-sky-100 mt-1">Layanan Informasi Tagihan Rekening Air Pelanggan</p>
-                </div>
-
-                <!-- Form Hanya Meminta Nomor Register Pelanggan -->
-                <form onsubmit="handleCheckBill(event)" class="p-6 sm:p-8 space-y-5">
-                    <div class="space-y-4">
-                        <div>
-                            <label for="input-no-register" class="block text-sm font-bold text-slate-700 uppercase tracking-wider mb-2 text-center">
-                                Masukkan Nomor Register Pelanggan
-                            </label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-sky-600">
-                                    <i class="fa-solid fa-hashtag text-lg"></i>
-                                </span>
-                                <input 
-                                    type="text" 
-                                    id="input-no-register" 
-                                    required 
-                                    autocomplete="off"
-                                    placeholder="Contoh: 01001"
-                                    class="w-full pl-12 pr-4 py-4 text-center text-xl sm:text-2xl font-extrabold tracking-widest text-slate-900 bg-sky-50/70 border-2 border-sky-200 rounded-2xl focus:outline-none focus:border-sky-600 focus:bg-white transition uppercase"
-                                >
-                            </div>
-                            <p class="text-xs text-slate-500 text-center mt-2">
-                                Nomor Register tertera pada kartu pelanggan atau struk pembayaran sebelumnya.
-                            </p>
-                        </div>
-
-                        <!-- Tombol Cepat Data Contoh Saat Mode Demo -->
-                        <div id="demo-quick-chips" class="flex flex-wrap items-center justify-center gap-2 pt-1">
-                            <span class="text-[11px] font-semibold text-slate-400">Uji Coba Demo:</span>
-                            <button type="button" onclick="quickFillRegister('01001')" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold transition">01001 (Lunas)</button>
-                            <button type="button" onclick="quickFillRegister('01002')" class="px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-bold transition">01002 (2 Lbr)</button>
-                            <button type="button" onclick="quickFillRegister('01003')" class="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-bold transition">01003 (3 Lbr)</button>
-                        </div>
-                    </div>
-
-                    <button type="submit" id="btn-submit-cek" class="w-full py-4 px-6 pdam-gradient hover:opacity-95 active:scale-[0.99] text-white font-extrabold text-base sm:text-lg rounded-2xl shadow-lg shadow-sky-600/30 transition flex items-center justify-center gap-3">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <span>CEK TAGIHAN</span>
-                    </button>
-
-                    <!-- Status Koneksi Database -->
-                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-                        <span id="db-status-indicator" class="flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                            <span>Sistem Online Siap</span>
-                        </span>
-                        <span id="info-last-update-badge" class="font-medium text-sky-700"></span>
-                    </div>
-                </form>
-            </div>
+        <div class="w-16 h-16 mx-auto bg-white rounded-full p-2 shadow-md flex items-center justify-center mb-3">
+          <img id="search-logo-img" src="" alt="Logo" class="hidden w-full h-full object-contain rounded-full" />
+          <svg id="search-logo-svg" viewBox="0 0 120 120" class="w-11 h-11" fill="none">
+            <path d="M60 12C60 12 22 54.5 22 79C22 99.9868 39.0132 114 60 114C80.9868 114 98 99.9868 98 79C98 54.5 60 12 60 12Z" fill="#0077cc"/>
+            <path d="M35 82C43 75 53 75 60 82C67 89 77 89 85 82" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+          </svg>
         </div>
-    </section>
+        <h2 class="text-lg sm:text-xl font-extrabold tracking-wide uppercase">PERUMDA TIRTA INDRAGIRI</h2>
+        <p class="text-sky-100 text-xs mt-1">Pengecekan Tagihan Rekening Air Pelanggan</p>
+      </div>
 
-    <!-- ==================== 3. LAYAR HASIL / LEMBAR TAGIHAN RESMI ==================== -->
-    <section id="view-bill" class="hidden min-h-screen py-6 px-4 sm:px-6 bg-slate-100 flex flex-col items-center justify-center">
-        <div class="max-w-xl w-full">
-            <!-- Tombol Navigasi Atas (Tidak ikut tercetak) -->
-            <div class="no-print flex flex-wrap items-center justify-between gap-2 mb-4">
-                <button onclick="navigateTo('view-search')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-sky-50 text-sky-800 font-bold text-sm rounded-xl shadow-sm border border-slate-200 transition">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    <span>Cek Nomor Lain</span>
-                </button>
-                <button onclick="window.print()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-sky-700 hover:bg-sky-800 text-white font-bold text-sm rounded-xl shadow-sm transition">
-                    <i class="fa-solid fa-print"></i>
-                    <span>Cetak / Simpan PDF</span>
-                </button>
-            </div>
-
-            <!-- KARTU LEMBAR TAGIHAN RESMI -->
-            <div id="printable-bill" class="bg-white rounded-3xl shadow-xl border-2 border-sky-600 overflow-hidden">
-                <!-- KOP SURAT INSTANSI PALING ATAS -->
-                <div class="bg-gradient-to-r from-sky-50 via-white to-sky-50 p-5 sm:p-6 border-b-4 border-[#0056b3]">
-                    <div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
-                        <!-- Logo Instansi di Kop -->
-                        <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 bg-white rounded-2xl p-2 border-2 border-sky-200 shadow-sm flex items-center justify-center">
-                            <img id="bill-logo-img" src="" alt="Logo Perumda" class="hidden w-full h-full object-contain">
-                            <svg id="bill-logo-svg" class="w-16 h-16" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="60" cy="60" r="54" fill="#E0F2FE" stroke="#0284C7" stroke-width="4"/>
-                                <path d="M60 18C60 18 30 52 30 74C30 90.5685 43.4315 104 60 104C76.5685 104 90 90.5685 90 74C90 52 60 18 60 18Z" fill="#0284C7"/>
-                                <path d="M35 74C43 68 52 79 60 74C68 69 77 79 85 74C84 89 73 99 60 99C47 99 36 89 35 74Z" fill="#FFFFFF"/>
-                                <path d="M39 83C46 79 53 87 60 83C67 79 74 87 81 83C78 93 70 99 60 99C50 99 42 93 39 83Z" fill="#1E3A8A"/>
-                            </svg>
-                        </div>
-
-                        <!-- Teks Kop Surat Menonjol Warna Khas PDAM -->
-                        <div class="flex-1">
-                            <p class="text-xs font-bold tracking-widest text-sky-700 uppercase">Pemerintah Kabupaten Indragiri Hilir</p>
-                            <h1 class="font-heading text-2xl sm:text-3xl font-black text-[#0056b3] tracking-tight leading-tight mt-0.5">
-                                PERUMDA TIRTA INDRAGIRI
-                            </h1>
-                            <p class="text-xs sm:text-sm font-semibold text-slate-600 mt-1">
-                                Jl. M. Boya No. 07 Tembilahan - Kab. Indragiri Hilir, Riau
-                            </p>
-                            <div class="mt-2 inline-block px-3 py-0.5 bg-[#0056b3] text-white text-[11px] font-bold rounded-md tracking-wider uppercase">
-                                Informasi Rincian Tagihan Rekening Air
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ISI LEMBAR TAGIHAN -->
-                <div class="p-5 sm:p-7 space-y-5">
-                    <!-- Banner Tanggal Update Harian -->
-                    <div class="bg-sky-50 border border-sky-200 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
-                        <span class="font-semibold text-sky-900 flex items-center gap-2">
-                            <i class="fa-regular fa-calendar-check text-sky-600"></i>
-                            Tanggal Update Data:
-                        </span>
-                        <span id="bill-tanggal-update" class="font-extrabold text-[#0056b3]">-</span>
-                    </div>
-
-                    <!-- Identitas Pelanggan -->
-                    <div class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-200/80 space-y-3">
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-1 border-b border-slate-200/70 pb-2.5">
-                            <span class="text-xs font-semibold text-slate-500 uppercase">Nomor Register</span>
-                            <span id="bill-no-register" class="sm:col-span-2 text-base font-extrabold text-sky-800 tracking-wider">-</span>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-1 border-b border-slate-200/70 pb-2.5">
-                            <span class="text-xs font-semibold text-slate-500 uppercase">Nama Pelanggan</span>
-                            <span id="bill-nama" class="sm:col-span-2 text-base sm:text-lg font-extrabold text-slate-900 uppercase">-</span>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-1 border-b border-slate-200/70 pb-2.5">
-                            <span class="text-xs font-semibold text-slate-500 uppercase">Alamat</span>
-                            <span id="bill-alamat" class="sm:col-span-2 text-sm font-semibold text-slate-700 leading-snug">-</span>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-1 items-center">
-                            <span class="text-xs font-semibold text-slate-500 uppercase">Periode Rekening</span>
-                            <div class="sm:col-span-2">
-                                <span id="bill-periode-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-sm font-extrabold bg-sky-100 text-sky-900 border border-sky-300">
-                                    -
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Rincian Nominal Tagihan -->
-                    <div class="space-y-3 pt-1">
-                        <h3 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider px-1">Rincian Biaya</h3>
-                        
-                        <div class="flex items-center justify-between px-4 py-3 rounded-xl bg-white border border-slate-200">
-                            <span class="text-sm sm:text-base font-semibold text-slate-700">Tagihan Air</span>
-                            <span id="bill-tagihan-air" class="text-base sm:text-lg font-bold text-slate-900">Rp 0</span>
-                        </div>
-
-                        <div class="flex items-center justify-between px-4 py-3 rounded-xl bg-white border border-slate-200">
-                            <span class="text-sm sm:text-base font-semibold text-slate-700">Tagihan Non Air</span>
-                            <span id="bill-tagihan-non-air" class="text-base sm:text-lg font-bold text-slate-900">Rp 0</span>
-                        </div>
-
-                        <div class="flex items-center justify-between px-4 py-3 rounded-xl bg-white border border-slate-200">
-                            <span class="text-sm sm:text-base font-semibold text-slate-700">Denda</span>
-                            <span id="bill-denda" class="text-base sm:text-lg font-bold text-rose-600">Rp 0</span>
-                        </div>
-                    </div>
-
-                    <!-- KOTAK HIGHLIGHT JUMLAH TAGIHAN (BESAR & MENONJOL) -->
-                    <div class="rounded-2xl pdam-gradient p-5 sm:p-6 text-white shadow-lg border-2 border-sky-300">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                            <div>
-                                <p class="text-xs sm:text-sm font-bold uppercase tracking-widest text-sky-100">Jumlah Tagihan</p>
-                                <p class="text-[11px] text-sky-200 mt-0.5">Total keseluruhan yang harus dibayarkan</p>
-                            </div>
-                            <div class="text-left sm:text-right">
-                                <span id="bill-total" class="font-heading text-3xl sm:text-4xl font-black tracking-tight text-white drop-shadow">
-                                    Rp 0
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- PERINGATAN WAJIB DI BAGIAN PALING BAWAH -->
-                    <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 text-center">
-                        <p class="text-xs sm:text-sm font-extrabold text-amber-950 leading-relaxed tracking-wide uppercase">
-                            "INI HANYA UNTUK MENGETAHUI JUMLAH TAGIHAN, APABILA ANDA TELAH MELAKUKAN PEMBAYARAN MAKA TAGIHAN INI DIABAIKAN SAJA"
-                        </p>
-                    </div>
-                </div>
-            </div>
+      <form onsubmit="handleSearchBill(event)" class="p-6 sm:p-8 space-y-5">
+        <div>
+          <label for="input-no-pdam" class="block text-sm font-bold text-slate-700 mb-2">
+            Nomor PDAM Pelanggan
+          </label>
+          <input
+            type="text"
+            id="input-no-pdam"
+            required
+            autocomplete="off"
+            placeholder="Masukkan No. PDAM Anda..."
+            class="w-full px-4 py-3.5 text-center text-lg font-bold tracking-wider rounded-xl border-2 border-slate-200 focus:border-[#0077cc] focus:ring-4 focus:ring-sky-100 outline-none transition uppercase"
+          />
         </div>
-    </section>
 
-    <!-- ==================== MODAL LOGIN KHUSUS ADMIN ==================== -->
-    <div id="modal-admin-login" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-sm w-full p-6 sm:p-7 shadow-2xl border border-slate-200 relative">
-            <button onclick="closeAdminLoginModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <div class="text-center mb-5">
-                <div class="w-14 h-14 mx-auto rounded-2xl pdam-gradient text-white flex items-center justify-center text-2xl shadow-md mb-3">
-                    <i class="fa-solid fa-user-shield"></i>
-                </div>
-                <h3 class="font-heading text-xl font-extrabold text-slate-900">Login Khusus Admin</h3>
-                <p class="text-xs text-slate-500 mt-1">PERUMDA TIRTA INDRAGIRI</p>
-            </div>
-            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Username</label>
-                    <input type="text" id="admin-username" required value="admin" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-sky-600 focus:outline-none font-semibold text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
-                    <input type="password" id="admin-password" required placeholder="Masukkan password admin" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-sky-600 focus:outline-none font-semibold text-sm">
-                </div>
-                <button type="submit" class="w-full py-3.5 pdam-gradient text-white font-extrabold rounded-xl shadow-md hover:opacity-95 transition text-sm">
-                    MASUK PANEL ADMIN
-                </button>
-            </form>
+        <div id="search-error" class="hidden p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm font-medium text-center"></div>
+
+        <button
+          type="submit"
+          id="btn-cek-tagihan"
+          class="w-full py-3.5 px-6 rounded-xl pdam-gradient text-white font-bold text-base shadow-lg hover:opacity-95 active:scale-[0.99] transition flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/>
+          </svg>
+          <span>CEK TAGIHAN SEKARANG</span>
+        </button>
+
+        <!-- Tombol Cepat Data Uji Coba (Hanya muncul saat mode Demo Lokal) -->
+        <div id="demo-quick-hint" class="hidden pt-2 border-t border-slate-100 text-center">
+          <p class="text-[11px] text-slate-400 mb-2">Mode Demo Aktif — Klik contoh No. PDAM:</p>
+          <div class="flex items-center justify-center gap-2">
+            <button type="button" onclick="quickFill('01001')" class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 cursor-pointer">01001 (Lunas)</button>
+            <button type="button" onclick="quickFill('01002')" class="px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 text-xs font-bold hover:bg-sky-100 cursor-pointer">01002 (1 Lbr)</button>
+            <button type="button" onclick="quickFill('01003')" class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold hover:bg-amber-100 cursor-pointer">01003 (2 Lbr)</button>
+          </div>
         </div>
+      </form>
     </div>
 
-    <!-- ==================== 4. LAYAR KHUSUS ADMIN (TERPROTEKSI LOGIN) ==================== -->
-    <section id="view-admin" class="hidden min-h-screen bg-slate-100 pb-12">
-        <!-- Navbar Admin -->
-        <header class="pdam-gradient text-white shadow-md sticky top-0 z-30">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-white text-sky-700 flex items-center justify-center font-black text-xl shadow">
-                        <i class="fa-solid fa-droplet"></i>
-                    </div>
-                    <div>
-                        <h1 class="font-heading font-extrabold text-base sm:text-lg leading-tight">PANEL ADMIN PERUMDA</h1>
-                        <p class="text-xs text-sky-100">Tirta Indragiri • Manajemen Tagihan Harian</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="navigateTo('view-splash')" class="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-xs sm:text-sm font-semibold transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-eye"></i>
-                        <span>Lihat Layar Publik</span>
-                    </button>
-                    <button onclick="handleAdminLogout()" class="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-xs sm:text-sm font-bold transition flex items-center gap-1.5 shadow">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        <span>Logout</span>
-                    </button>
-                </div>
-            </div>
-        </header>
+    <button onclick="openAdminLogin()" class="no-print fixed bottom-5 right-5 z-20 flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-slate-800/80 hover:bg-slate-900 text-white text-xs font-semibold shadow-md transition cursor-pointer">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+      </svg>
+      <span>Admin</span>
+    </button>
+  </section>
 
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 mt-6 space-y-6">
-            <!-- Baris 1: Konfigurasi Supabase & Pengaturan Instansi -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Card Koneksi Supabase -->
-                <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="font-heading font-extrabold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-database text-emerald-600"></i>
-                            <span>Koneksi Database Supabase</span>
-                        </h2>
-                        <button onclick="openSqlModal()" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition">
-                            <i class="fa-solid fa-code mr-1"></i> Lihat SQL Setup Supabase
-                        </button>
-                    </div>
+  <!-- =========================================================
+       LAYAR 3: LEMBAR HASIL TAGIHAN PELANGGAN
+  ========================================================== -->
+  <section id="screen-bill" class="hidden min-h-screen py-6 px-4 sm:py-10 flex flex-col items-center justify-center">
+    <div id="bill-paper" class="w-full max-w-xl bg-white rounded-2xl pdam-card-shadow border border-sky-200 overflow-hidden">
 
-                    <div class="space-y-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">Supabase Project URL</label>
-                            <input type="url" id="cfg-supabase-url" placeholder="https://xxxxxxxxxxxx.supabase.co" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:border-sky-600 focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">Supabase Anon / Public Key</label>
-                            <input type="password" id="cfg-supabase-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:border-sky-600 focus:outline-none">
-                        </div>
-                        <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
-                            <span id="admin-conn-status" class="text-xs font-semibold text-amber-600 flex items-center gap-1.5">
-                                <i class="fa-solid fa-circle-dot"></i> Mode Demo Lokal (Belum terhubung Supabase)
-                            </span>
-                            <button onclick="saveSupabaseConfig()" class="px-4 py-2 bg-sky-700 hover:bg-sky-800 text-white text-xs sm:text-sm font-bold rounded-xl transition">
-                                Simpan & Hubungkan
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card Pengaturan Instansi & Keamanan Admin -->
-                <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200">
-                    <h2 class="font-heading font-extrabold text-slate-800 flex items-center gap-2 mb-4">
-                        <i class="fa-solid fa-sliders text-sky-600"></i>
-                        <span>Pengaturan Instansi & Tanggal Update</span>
-                    </h2>
-
-                    <div class="space-y-3">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600 mb-1">Tanggal Update Harian</label>
-                                <input type="text" id="cfg-tanggal-update" oninput="updateAdminPeriodePreview()" placeholder="Senin, 23 November 2026" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:border-sky-600 focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600 mb-1">Password Baru Admin</label>
-                                <input type="text" id="cfg-admin-pass" placeholder="tirta123" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:border-sky-600 focus:outline-none">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">URL Logo Instansi (Opsional, kosongkan untuk logo bawaan)</label>
-                            <input type="url" id="cfg-logo-url" placeholder="https://example.com/logo-pdam.png" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:border-sky-600 focus:outline-none">
-                        </div>
-                        <div class="flex justify-end pt-2">
-                            <button onclick="saveInstanceSettings()" class="px-4 py-2 bg-[#0056b3] hover:bg-blue-800 text-white text-xs sm:text-sm font-bold rounded-xl transition">
-                                Simpan Pengaturan
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Baris 2: Input Manual & Import Massal Excel/CSV -->
-            <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200">
-                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4 mb-5">
-                    <div>
-                        <h2 class="font-heading font-extrabold text-lg text-slate-800">Kelola Data Tagihan Pelanggan</h2>
-                        <p class="text-xs text-slate-500">Tambah satu per satu atau import massal dari Excel/CSV untuk update harian.</p>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <button onclick="openBulkImportModal()" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-sm transition flex items-center gap-2">
-                            <i class="fa-solid fa-file-excel"></i>
-                            <span>Import Massal (Excel / CSV)</span>
-                        </button>
-                        <button onclick="resetFormPelanggan()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-bold transition">
-                            + Form Baru
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Form Tambah / Edit Pelanggan -->
-                <form id="form-admin-pelanggan" onsubmit="handleSavePelanggan(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-sky-50/60 p-4 rounded-2xl border border-sky-100">
-                    <input type="hidden" id="edit-mode-id">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">No. Register *</label>
-                        <input type="text" id="f-no-register" required placeholder="01001" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 bg-white font-bold uppercase">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Nama Pelanggan *</label>
-                        <input type="text" id="f-nama" required placeholder="AHMAD SUDIRMAN" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 bg-white uppercase">
-                    </div>
-                    <div class="sm:col-span-2">
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Alamat Lengkap *</label>
-                        <input type="text" id="f-alamat" required placeholder="JL. M. BOYA LR. MELATI NO. 12 TEMBILAHAN" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Periode Rekening (Lembar) *</label>
-                        <input type="number" id="f-periode" required min="0" value="1" oninput="updateAdminPeriodePreview()" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 bg-white font-bold">
-                        <span id="admin-periode-preview" class="text-[11px] font-bold text-emerald-700 block mt-1">Preview: LUNAS (1 Lembar) • Tagihan Rp 0</span>
-                        <span class="text-[10px] text-slate-500 block">0 atau 1 = LUNAS (Rp 0) | 2 = 1 Lembar (H-1) | 3 = 2 Lembar dst.</span>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Tagihan Air (Rp) *</label>
-                        <input type="number" id="f-tagihan-air" required min="0" value="0" oninput="updateAdminPeriodePreview()" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Tagihan Non Air (Rp)</label>
-                        <input type="number" id="f-tagihan-non-air" min="0" value="0" oninput="updateAdminPeriodePreview()" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Denda (Rp)</label>
-                        <input type="number" id="f-denda" min="0" value="0" oninput="updateAdminPeriodePreview()" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 bg-white">
-                    </div>
-                    <div class="sm:col-span-2 lg:col-span-3">
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal Update Data</label>
-                        <input type="text" id="f-tanggal-update" oninput="updateAdminPeriodePreview()" placeholder="Kosongkan untuk mengikuti Tanggal Update Harian" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 bg-white">
-                    </div>
-                    <div class="flex items-end">
-                        <button type="submit" id="btn-save-pelanggan" class="w-full py-2.5 px-4 pdam-gradient text-white font-bold text-sm rounded-xl shadow hover:opacity-95 transition">
-                            <i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Data
-                        </button>
-                    </div>
-                </form>
-
-                <!-- Pencarian & Tabel Daftar Tagihan -->
-                <div class="mt-6">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-                        <div class="relative max-w-xs w-full">
-                            <i class="fa-solid fa-search absolute left-3.5 top-3 text-slate-400 text-sm"></i>
-                            <input type="text" id="admin-search-table" onkeyup="renderAdminTable()" placeholder="Cari No. Register atau Nama..." class="w-full pl-9 pr-4 py-2 text-sm rounded-xl border border-slate-300 focus:border-sky-600 focus:outline-none">
-                        </div>
-                        <div class="flex items-center gap-3 text-xs text-slate-500">
-                            <span>Total Data: <b id="total-records-count" class="text-slate-800">0</b> pelanggan</span>
-                            <button onclick="loadAllData()" class="text-sky-700 hover:underline font-semibold">
-                                <i class="fa-solid fa-rotate"></i> Refresh
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="overflow-x-auto rounded-2xl border border-slate-200">
-                        <table class="w-full text-left border-collapse text-sm">
-                            <thead>
-                                <tr class="bg-slate-50 border-b border-slate-200 text-xs font-extrabold text-slate-600 uppercase">
-                                    <th class="py-3 px-4">No. Reg</th>
-                                    <th class="py-3 px-4">Nama & Alamat</th>
-                                    <th class="py-3 px-4">Periode</th>
-                                    <th class="py-3 px-4 text-right">Air</th>
-                                    <th class="py-3 px-4 text-right">Non Air</th>
-                                    <th class="py-3 px-4 text-right">Denda</th>
-                                    <th class="py-3 px-4 text-right">Jumlah Total</th>
-                                    <th class="py-3 px-4 text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-table-body" class="divide-y divide-slate-100 bg-white">
-                                <!-- Diisi via JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </section>
-
-    <!-- ==================== MODAL IMPORT MASSAL (CSV / COPY-PASTE EXCEL) ==================== -->
-    <div id="modal-bulk-import" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                <h3 class="font-heading text-lg font-extrabold text-slate-900">Import Massal Data Tagihan (Excel / CSV)</h3>
-                <button onclick="closeBulkImportModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <div class="space-y-4 text-sm">
-                <div class="bg-sky-50 border border-sky-200 rounded-xl p-3.5 text-xs text-sky-900 space-y-1">
-                    <p class="font-bold">Format Urutan Kolom (Pisahkan dengan Tab dari Excel atau Koma / Titik Koma):</p>
-                    <code class="block bg-white p-2 rounded border border-sky-200 font-mono text-[11px] overflow-x-auto">
-                        no_register, nama, alamat, periode_angka, tagihan_air, tagihan_non_air, denda
-                    </code>
-                    <p class="text-slate-600 pt-1">Contoh baris data (Anda bisa langsung Copy dari baris Excel lalu Paste di bawah):</p>
-                    <pre class="bg-white p-2 rounded border border-sky-200 font-mono text-[11px] overflow-x-auto">01005, BUDI SANTOSO, JL. SWARNA BUMI NO 10, 1, 85000, 5000, 0
-01006, SITI AMINAH, JL. BAHARUDDIN YUSUF, 3, 240000, 15000, 10000</pre>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Upload File .CSV (Opsional)</label>
-                    <input type="file" accept=".csv,.txt" onchange="handleCsvFileUpload(event)" class="text-xs file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-100 file:text-sky-700 hover:file:bg-sky-200">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Atau Paste Data Dari Excel di Sini:</label>
-                    <textarea id="bulk-paste-area" rows="6" placeholder="Tempel (Ctrl+V) baris data dari Excel di sini..." class="w-full p-3 rounded-xl border border-slate-300 font-mono text-xs focus:border-sky-600 focus:outline-none"></textarea>
-                </div>
-
-                <div class="flex items-center justify-between pt-2">
-                    <label class="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 cursor-pointer">
-                        <input type="checkbox" id="bulk-replace-existing" checked class="rounded text-sky-600">
-                        <span>Timpa / Update jika No. Register sudah ada</span>
-                    </label>
-                    <div class="flex gap-2">
-                        <button onclick="closeBulkImportModal()" class="px-4 py-2 rounded-xl bg-slate-100 font-bold text-xs text-slate-700">Batal</button>
-                        <button onclick="processBulkImport()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow">
-                            Proses Import Data
-                        </button>
-                    </div>
-                </div>
-            </div>
+      <!-- KOP SURAT INSTANSI -->
+      <div class="bg-gradient-to-r from-[#004481] via-[#0066b3] to-[#0088cc] p-5 sm:p-6 text-white border-b-4 border-amber-400">
+        <div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+          <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white p-2 shadow-lg flex-shrink-0 flex items-center justify-center">
+            <img id="bill-logo-img" src="" alt="Logo Instansi" class="hidden w-full h-full object-contain rounded-full" />
+            <svg id="bill-logo-svg" viewBox="0 0 120 120" class="w-12 h-12 sm:w-14 sm:h-14" fill="none">
+              <path d="M60 12C60 12 22 54.5 22 79C22 99.9868 39.0132 114 60 114C80.9868 114 98 99.9868 98 79C98 54.5 60 12 60 12Z" fill="#0066b3"/>
+              <path d="M35 82C43 75 53 75 60 82C67 89 77 89 85 82" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+              <path d="M40 94C47 89 54 89 60 94C66 99 73 99 80 94" stroke="#bae6fd" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <p class="text-[11px] font-bold tracking-widest uppercase text-sky-200">Perusahaan Umum Daerah Air Minum</p>
+            <h1 class="text-xl sm:text-2xl font-extrabold tracking-wide text-white drop-shadow-sm mt-0.5">
+              PERUMDA TIRTA INDRAGIRI
+            </h1>
+            <p class="text-xs text-sky-100 mt-1">Jl. M. Boya No. 07 Tembilahan - Kabupaten Indragiri Hilir</p>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- ==================== MODAL PANDUAN SQL SETUP SUPABASE ==================== -->
-    <div id="modal-sql-setup" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                <h3 class="font-heading text-lg font-extrabold text-slate-900">SQL Setup Tabel & Kebijakan Supabase</h3>
-                <button onclick="closeSqlModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+      <!-- JUDUL & TANGGAL UPDATE HARIAN -->
+      <div class="bg-sky-50 px-5 sm:px-7 py-3 border-b border-sky-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <span class="font-extrabold text-[#00529b] uppercase tracking-wider">INFORMASI TAGIHAN REKENING AIR</span>
+        <span class="text-slate-600 font-semibold">
+          Tanggal Update: <strong id="bill-tanggal-update" class="text-[#00529b]">-</strong>
+        </span>
+      </div>
+
+      <!-- ISI LEMBAR TAGIHAN -->
+      <div class="p-5 sm:p-7 space-y-5">
+        <!-- Identitas Pelanggan & Periode -->
+        <div class="grid grid-cols-1 gap-3 bg-slate-50/80 p-4 rounded-xl border border-slate-200/80 text-sm">
+          <div class="flex justify-between items-start gap-4 border-b border-slate-200/70 pb-2.5">
+            <span class="text-slate-500 font-medium">No. PDAM</span>
+            <span id="bill-no-pdam" class="font-extrabold text-slate-900 text-right tracking-wider">-</span>
+          </div>
+          <div class="flex justify-between items-start gap-4 border-b border-slate-200/70 pb-2.5">
+            <span class="text-slate-500 font-medium">Alamat</span>
+            <span id="bill-alamat" class="font-semibold text-slate-800 text-right max-w-xs">-</span>
+          </div>
+          <div class="flex justify-between items-center gap-4 pt-0.5">
+            <span class="text-slate-500 font-medium">Periode Rekening</span>
+            <span id="bill-periode" class="text-right font-bold">-</span>
+          </div>
+        </div>
+
+        <!-- Rincian Tagihan -->
+        <div class="space-y-2.5 text-sm px-1">
+          <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-200">
+            <span class="text-slate-600 font-medium">Tagihan Air (Rp)</span>
+            <span id="bill-tagihan-air" class="font-bold text-slate-800">Rp 0</span>
+          </div>
+          <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-200">
+            <span class="text-slate-600 font-medium">Non Air (Rp)</span>
+            <span id="bill-non-air" class="font-bold text-slate-800">Rp 0</span>
+          </div>
+          <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-200">
+            <span class="text-slate-600 font-medium">Denda (Rp)</span>
+            <span id="bill-denda" class="font-bold text-rose-600">Rp 0</span>
+          </div>
+        </div>
+
+        <!-- Kotak Jumlah Tagihan Menonjol -->
+        <div id="bill-total-box" class="rounded-2xl bg-gradient-to-r from-[#004e92] to-[#0077cc] p-5 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-2">
+          <div class="text-center sm:text-left">
+            <p class="text-xs font-bold uppercase tracking-widest text-sky-200">Jumlah (Rp)</p>
+            <p class="text-[11px] text-sky-100 mt-0.5">Total Kewajiban Pembayaran Rekening</p>
+          </div>
+          <div id="bill-jumlah" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-amber-300 drop-shadow">
+            Rp 0
+          </div>
+        </div>
+
+        <!-- Catatan Paling Bawah Sesuai Instruksi -->
+        <div class="p-4 rounded-xl bg-amber-50 border-2 border-amber-300 text-center">
+          <p class="text-xs sm:text-[13px] font-extrabold text-amber-900 leading-relaxed tracking-wide uppercase">
+            "INI HANYA UNTUK MENGETAHUI JUMLAH TAGIHAN, APABILA ANDA TELAH MELAKUKAN PEMBAYARAN MAKA TAGIHAN INI DIABAIKAN SAJA"
+          </p>
+        </div>
+
+        <!-- Tombol Aksi -->
+        <div class="no-print pt-2 flex flex-col sm:flex-row gap-3">
+          <button onclick="backToSearch()" class="flex-1 py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition flex items-center justify-center gap-2 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            <span>Cek No. PDAM Lain</span>
+          </button>
+          <button onclick="window.print()" class="flex-1 py-3 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm shadow transition flex items-center justify-center gap-2 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+            </svg>
+            <span>Cetak / Simpan PDF</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       MODAL LOGIN ADMIN
+  ========================================================== -->
+  <div id="modal-admin-login" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="pdam-gradient p-5 text-white flex items-center justify-between">
+        <div>
+          <h3 class="font-extrabold text-base">LOGIN KHUSUS ADMIN</h3>
+          <p class="text-xs text-sky-100">PERUMDA TIRTA INDRAGIRI</p>
+        </div>
+        <button onclick="closeAdminLogin()" class="p-1.5 rounded-lg bg-white/15 hover:bg-white/25 transition cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <form onsubmit="handleAdminLogin(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Username Admin</label>
+          <input type="text" id="admin-user" required placeholder="admin" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-sky-600 outline-none text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Password</label>
+          <input type="password" id="admin-pass" required placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-sky-600 outline-none text-sm" />
+        </div>
+        <div id="admin-login-error" class="hidden text-xs font-semibold text-rose-600 bg-rose-50 p-2.5 rounded-lg border border-rose-200"></div>
+        <button type="submit" class="w-full py-2.5 rounded-xl pdam-gradient text-white font-bold text-sm shadow hover:opacity-95 transition cursor-pointer">
+          MASUK KE PANEL ADMIN
+        </button>
+        <p class="text-[11px] text-center text-slate-400">Default: admin / tirta123</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       LAYAR 4: PANEL KHUSUS ADMIN (HANYA BISA DILIHAT ADMIN)
+  ========================================================== -->
+  <section id="screen-admin" class="hidden min-h-screen bg-slate-100 pb-12">
+    <!-- Header Admin -->
+    <header class="pdam-gradient text-white shadow-md sticky top-0 z-30">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-white text-[#00529b] font-extrabold flex items-center justify-center shadow">
+            TI
+          </div>
+          <div>
+            <h1 class="font-extrabold text-base sm:text-lg leading-tight">PANEL ADMIN — PERUMDA TIRTA INDRAGIRI</h1>
+            <div class="flex items-center gap-2 text-xs text-sky-100">
+              <span id="db-status-badge" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-500/25 text-amber-100 font-semibold">
+                <span class="w-2 h-2 rounded-full bg-amber-300"></span> Mode Demo Lokal
+              </span>
             </div>
-            <p class="text-xs text-slate-600 mb-3">
-                Salin dan jalankan perintah SQL berikut pada menu <b>SQL Editor</b> di Dashboard Supabase Anda agar aplikasi dapat menyimpan dan membaca data tagihan secara online:
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="openSqlModal()" class="px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-xs font-bold transition cursor-pointer">
+            SQL Setup Supabase
+          </button>
+          <button onclick="logoutAdmin()" class="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-xs font-bold shadow transition cursor-pointer">
+            Keluar Admin
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-6 space-y-6">
+
+      <!-- Baris 1: Pengaturan Supabase & Pengaturan Harian/Logo -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Konfigurasi Supabase -->
+        <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="font-extrabold text-slate-800 text-sm sm:text-base flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              Koneksi Database Online (Supabase)
+            </h2>
+            <button onclick="openSqlModal()" class="text-xs font-bold text-sky-600 hover:underline cursor-pointer">Lihat Skrip SQL</button>
+          </div>
+          <div class="space-y-3 text-xs sm:text-sm">
+            <div>
+              <label class="block font-bold text-slate-600 mb-1">Supabase Project URL</label>
+              <input type="url" id="cfg-sb-url" placeholder="https://xyzproject.supabase.co" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 focus:border-sky-600 outline-none" />
+            </div>
+            <div>
+              <label class="block font-bold text-slate-600 mb-1">Supabase Anon Public Key</label>
+              <input type="password" id="cfg-sb-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." class="w-full px-3.5 py-2 rounded-xl border border-slate-300 focus:border-sky-600 outline-none" />
+            </div>
+            <div class="flex flex-wrap gap-2 pt-1">
+              <button onclick="saveSupabaseConfig()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow transition cursor-pointer">
+                Simpan & Hubungkan Supabase
+              </button>
+              <button onclick="resetSupabaseConfig()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer">
+                Putuskan (Mode Demo)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pengaturan Tanggal Update Harian & Logo Instansi -->
+        <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-4">
+          <h2 class="font-extrabold text-slate-800 text-sm sm:text-base flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+            Pengaturan Tanggal Update Harian & Logo
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+            <div>
+              <label class="block font-bold text-slate-600 mb-1">Tanggal Update Tagihan</label>
+              <input type="date" id="cfg-update-date" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 focus:border-sky-600 outline-none" />
+            </div>
+            <div>
+              <label class="block font-bold text-slate-600 mb-1">URL Logo Instansi (Opsional)</label>
+              <input type="url" id="cfg-logo-url" placeholder="https://.../logo-pdam.png" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 focus:border-sky-600 outline-none" />
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <button onclick="saveAppSettings()" class="px-4 py-2 rounded-xl bg-[#0066b3] hover:bg-[#004e92] text-white font-bold text-xs shadow transition cursor-pointer">
+              Simpan Pengaturan Tampilan
+            </button>
+            <span class="text-[11px] text-slate-500">Acuan bulan periode rekening mengikuti Tanggal Update.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Baris 2: Form Tambah/Edit Data Tagihan & Import Massal Excel/CSV -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Form Input Satuan (7 Kolom Supabase) -->
+        <div class="lg:col-span-7 bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200">
+          <h2 id="form-title" class="font-extrabold text-slate-800 text-sm sm:text-base mb-4">
+            Tambah / Update Data Tagihan Pelanggan
+          </h2>
+          <form onsubmit="handleSaveCustomer(event)" class="space-y-3.5 text-xs sm:text-sm">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">No. PDAM <span class="text-rose-500">*</span></label>
+                <input type="text" id="f-no-pdam" required placeholder="Contoh: 01004" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 focus:border-sky-600 outline-none font-bold uppercase" />
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Jumlah Rekening <span class="text-rose-500">*</span></label>
+                <input type="number" id="f-jumlah-rekening" min="0" value="1" required oninput="updateAdminFormPreview()" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 focus:border-sky-600 outline-none font-bold" />
+              </div>
+            </div>
+
+            <!-- Pratinjau Logika Periode Rekening -->
+            <div class="p-3 rounded-xl bg-sky-50 border border-sky-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <span class="font-semibold text-slate-600">Pratinjau Periode Rekening:</span>
+              <span id="f-periode-preview" class="font-extrabold text-[#00529b]">LUNAS (1 Lembar)</span>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Alamat <span class="text-rose-500">*</span></label>
+              <input type="text" id="f-alamat" required placeholder="Contoh: JL. M. BOYA NO. 15, TEMBILAHAN" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 focus:border-sky-600 outline-none uppercase" />
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Tagihan Air (Rp)</label>
+                <input type="number" id="f-tagihan-air" min="0" value="0" oninput="autoCalcJumlah()" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-sky-600 outline-none" />
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Non Air (Rp)</label>
+                <input type="number" id="f-non-air" min="0" value="0" oninput="autoCalcJumlah()" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-sky-600 outline-none" />
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Denda (Rp)</label>
+                <input type="number" id="f-denda" min="0" value="0" oninput="autoCalcJumlah()" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-sky-600 outline-none" />
+              </div>
+              <div>
+                <label class="block font-bold text-sky-800 mb-1">Jumlah (Rp)</label>
+                <input type="number" id="f-jumlah" min="0" value="0" class="w-full px-3 py-2 rounded-xl border-2 border-sky-300 bg-sky-50 font-extrabold text-sky-900 outline-none" />
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2 pt-2">
+              <button type="submit" class="px-5 py-2.5 rounded-xl pdam-gradient text-white font-bold text-xs sm:text-sm shadow hover:opacity-95 transition cursor-pointer">
+                Simpan Data Pelanggan
+              </button>
+              <button type="button" onclick="resetCustomerForm()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm transition cursor-pointer">
+                Reset Form
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Import Massal dari Excel / CSV -->
+        <div class="lg:col-span-5 bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col justify-between space-y-3">
+          <div class="space-y-2">
+            <h2 class="font-extrabold text-slate-800 text-sm sm:text-base">
+              Import Massal (Copy-Paste Excel / CSV)
+            </h2>
+            <p class="text-xs text-slate-500 leading-relaxed">
+              Urutan 7 kolom wajib:<br/>
+              <code class="text-[11px] bg-slate-100 px-1.5 py-0.5 rounded font-bold text-slate-700">
+                No. PDAM | Alamat | Tagihan Air (Rp) | Non Air (Rp) | Denda (Rp) | Jumlah (Rp) | Jumlah Rekening
+              </code>
             </p>
-            <div class="relative">
-                <pre id="sql-code-block" class="bg-slate-900 text-emerald-300 p-4 rounded-2xl text-xs font-mono overflow-x-auto leading-relaxed">-- 1. Buat Tabel Tagihan Pelanggan Perumda Tirta Indragiri
-CREATE TABLE IF NOT EXISTS public.tagihan_pelanggan (
-    no_register TEXT PRIMARY KEY,
-    nama TEXT NOT NULL,
-    alamat TEXT NOT NULL,
-    periode_angka INTEGER NOT NULL DEFAULT 1,
-    tagihan_air NUMERIC NOT NULL DEFAULT 0,
-    tagihan_non_air NUMERIC NOT NULL DEFAULT 0,
-    denda NUMERIC NOT NULL DEFAULT 0,
-    tanggal_update TEXT,
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+            <textarea
+              id="bulk-import-text"
+              rows="6"
+              placeholder="01004	JL. SUNGAI BERINGIN NO. 10	120000	0	5000	125000	2&#10;01005	JL. PELITA JAYA NO. 22	0	0	0	0	1"
+              class="w-full p-3 rounded-xl border border-slate-300 focus:border-sky-600 outline-none text-xs font-mono"
+            ></textarea>
+          </div>
+          <button onclick="handleBulkImport()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs sm:text-sm shadow transition cursor-pointer">
+            Proses & Upload Data Massal
+          </button>
+        </div>
+      </div>
+
+      <!-- Baris 3: Tabel Daftar Tagihan Pelanggan -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 class="font-extrabold text-slate-800 text-sm sm:text-base">Daftar Tagihan Pelanggan Tersimpan</h2>
+            <p class="text-xs text-slate-500">Total <strong id="total-records-count">0</strong> data pelanggan</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <input
+              type="text"
+              id="admin-filter-input"
+              oninput="renderAdminTable()"
+              placeholder="Cari No. PDAM / Alamat..."
+              class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:border-sky-600 outline-none"
+            />
+            <button onclick="loadCustomers()" class="px-3.5 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold text-xs border border-sky-200 transition cursor-pointer">
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-extrabold uppercase tracking-wider">
+                <th class="py-3.5 px-4">No. PDAM</th>
+                <th class="py-3.5 px-4">Alamat</th>
+                <th class="py-3.5 px-4 text-right">Tagihan Air (Rp)</th>
+                <th class="py-3.5 px-4 text-right">Non Air (Rp)</th>
+                <th class="py-3.5 px-4 text-right">Denda (Rp)</th>
+                <th class="py-3.5 px-4 text-right">Jumlah (Rp)</th>
+                <th class="py-3.5 px-4">Jumlah Rekening / Periode</th>
+                <th class="py-3.5 px-4 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="admin-table-body" class="divide-y divide-slate-100">
+              <!-- Diisi via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </section>
+
+  <!-- =========================================================
+       MODAL SKRIP SQL SETUP SUPABASE
+  ========================================================== -->
+  <div id="modal-sql" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="pdam-gradient p-5 text-white flex items-center justify-between">
+        <div>
+          <h3 class="font-extrabold text-base">SKRIP SQL SETUP TABEL SUPABASE</h3>
+          <p class="text-xs text-sky-100">Jalankan pada menu SQL Editor di Dashboard Supabase Anda</p>
+        </div>
+        <button onclick="closeSqlModal()" class="p-1.5 rounded-lg bg-white/15 hover:bg-white/25 transition cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="p-5 space-y-4">
+        <pre id="sql-code-block" class="bg-slate-900 text-emerald-300 p-4 rounded-xl text-xs overflow-x-auto leading-relaxed font-mono select-all">DROP TABLE IF EXISTS public.customers;
+
+CREATE TABLE public.customers (
+  no_pdam TEXT PRIMARY KEY,
+  alamat TEXT NOT NULL,
+  tagihan_air BIGINT NOT NULL DEFAULT 0,
+  non_air BIGINT NOT NULL DEFAULT 0,
+  denda BIGINT NOT NULL DEFAULT 0,
+  jumlah BIGINT NOT NULL DEFAULT 0,
+  jumlah_rekening INTEGER NOT NULL DEFAULT 1,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
--- 2. Aktifkan Row Level Security (RLS)
-ALTER TABLE public.tagihan_pelanggan ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.customers ENABLE ROW LEVEL SECURITY;
 
--- 3. Izinkan Akses Baca & Tulis Publik/Anon (Untuk Cek Tagihan & Admin Panel)
-CREATE POLICY "Akses Penuh Tagihan" ON public.tagihan_pelanggan
-    FOR ALL
-    USING (true)
-    WITH CHECK (true);
-
--- 4. Contoh Data Awal (Opsional)
-INSERT INTO public.tagihan_pelanggan (no_register, nama, alamat, periode_angka, tagihan_air, tagihan_non_air, denda, tanggal_update)
-VALUES 
-('01001', 'H. MUHAMMAD YUSUF', 'JL. M. BOYA NO. 15 TEMBILAHAN', 1, 75000, 5000, 0, 'Senin, 23 November 2026'),
-('01002', 'SITI RAHMAWATI', 'JL. SUDIRMAN LR. CEMPAKA NO. 08', 3, 210000, 15000, 15000, 'Senin, 23 November 2026')
-ON CONFLICT (no_register) DO NOTHING;</pre>
-                <button onclick="copySqlCode()" class="mt-3 w-full py-2.5 bg-sky-700 hover:bg-sky-800 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2">
-                    <i class="fa-regular fa-copy"></i>
-                    <span>Salin Query SQL</span>
-                </button>
-            </div>
+CREATE POLICY "Izinkan semua operasi pada tabel customers"
+ON public.customers
+FOR ALL
+USING (true)
+WITH CHECK (true);</pre>
+        <div class="flex justify-end gap-2">
+          <button onclick="copySqlCode()" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs transition cursor-pointer">
+            Salin Skrip SQL
+          </button>
+          <button onclick="closeSqlModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer">
+            Tutup
+          </button>
         </div>
+      </div>
     </div>
+  </div>
 
-    <!-- ==================== JAVASCRIPT LOGIKA APLIKASI ==================== -->
-    <script>
-        // ==================== KONFIGURASI & STATE GLOBAL ====================
-        const STORAGE_KEYS = {
-            SUPABASE_URL: 'perumda_ti_sb_url',
-            SUPABASE_KEY: 'perumda_ti_sb_key',
-            ADMIN_PASS: 'perumda_ti_admin_pass',
-            ADMIN_SESSION: 'perumda_ti_admin_logged_in',
-            LOGO_URL: 'perumda_ti_logo_url',
-            TANGGAL_UPDATE: 'perumda_ti_tanggal_update',
-            DEMO_DATA: 'perumda_ti_demo_records'
+  <!-- =========================================================
+       LOGIKA JAVASCRIPT & INTEGRASI SUPABASE
+  ========================================================== -->
+  <script>
+    const NAMA_BULAN = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+
+    // Data awal demo jika Supabase belum dihubungkan
+    const DEFAULT_CUSTOMERS = [
+      {
+        no_pdam: '01001',
+        alamat: 'JL. M. BOYA NO. 12, TEMBILAHAN',
+        tagihan_air: 0,
+        non_air: 0,
+        denda: 0,
+        jumlah: 0,
+        jumlah_rekening: 1
+      },
+      {
+        no_pdam: '01002',
+        alamat: 'JL. KAYU JATI GG. MELATI NO. 05',
+        tagihan_air: 145000,
+        non_air: 0,
+        denda: 5000,
+        jumlah: 150000,
+        jumlah_rekening: 2
+      },
+      {
+        no_pdam: '01003',
+        alamat: 'JL. JEND. SUDIRMAN NO. 88, TEMBILAHAN KOTA',
+        tagihan_air: 285000,
+        non_air: 25000,
+        denda: 15000,
+        jumlah: 325000,
+        jumlah_rekening: 3
+      }
+    ];
+
+    let supabaseClient = null;
+    let customersData = [];
+
+    // Format Rupiah
+    function formatRupiah(angka) {
+      const num = Number(angka) || 0;
+      return 'Rp ' + num.toLocaleString('id-ID');
+    }
+
+    // Ambil Tanggal Update Harian (default: hari ini)
+    function getUpdateDateObj() {
+      const savedDate = localStorage.getItem('pdam_update_date');
+      if (savedDate) {
+        const parts = savedDate.split('-');
+        if (parts.length === 3) {
+          return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        }
+      }
+      return new Date();
+    }
+
+    function formatTanggalIndonesia(dateObj) {
+      const tgl = String(dateObj.getDate()).padStart(2, '0');
+      const bln = NAMA_BULAN[dateObj.getMonth()];
+      const thn = dateObj.getFullYear();
+      return `${tgl} ${bln} ${thn}`;
+    }
+
+    // LOGIKA PERIODE REKENING:
+    // - 0 atau 1 lembar = LUNAS
+    // - 2 lembar = 1 Lembar (Bulan Sebelumnya, misal Oktober)
+    // - 3 lembar = 2 Lembar (Oktober dan September), dst.
+    function formatPeriodeRekening(jumlahRekening) {
+      const lembar = parseInt(jumlahRekening, 10) || 0;
+      if (lembar <= 1) {
+        return {
+          isLunas: true,
+          text: `LUNAS (${lembar} Lembar)`
         };
+      }
 
-        // Default Placeholder Supabase (Bisa diisi user atau langsung pakai mode demo)
-        const DEFAULT_SUPABASE_URL = ''; 
-        const DEFAULT_SUPABASE_KEY = '';
+      const jumlahBulanTagihan = lembar - 1;
+      const refDate = getUpdateDateObj();
+      const daftarBulan = [];
 
-        let supabaseClient = null;
-        let allBillsData = [];
+      for (let i = 1; i <= jumlahBulanTagihan; i++) {
+        const d = new Date(refDate.getFullYear(), refDate.getMonth() - i, 1);
+        daftarBulan.push(`${NAMA_BULAN[d.getMonth()]} ${d.getFullYear()}`);
+      }
 
-        // Data Contoh Bawaan (Jika Supabase belum dikonfigurasi)
-        const INITIAL_DEMO_DATA = [
-            {
-                no_register: '01001',
-                nama: 'H. MUHAMMAD YUSUF',
-                alamat: 'JL. M. BOYA NO. 15 TEMBILAHAN',
-                periode_angka: 1,
-                tagihan_air: 0,
-                tagihan_non_air: 0,
-                denda: 0,
-                tanggal_update: getFormattedTodayIndo()
-            },
-            {
-                no_register: '01002',
-                nama: 'SITI RAHMAWATI',
-                alamat: 'JL. JEND. SUDIRMAN LR. CEMPAKA NO. 08',
-                periode_angka: 2,
-                tagihan_air: 85000,
-                tagihan_non_air: 5000,
-                denda: 0,
-                tanggal_update: getFormattedTodayIndo()
-            },
-            {
-                no_register: '01003',
-                nama: 'ANDI SAPUTRA',
-                alamat: 'JL. SWARNA BUMI GG. KENANGA TEMBILAHAN',
-                periode_angka: 3,
-                tagihan_air: 175000,
-                tagihan_non_air: 10000,
-                denda: 10000,
-                tanggal_update: getFormattedTodayIndo()
-            }
-        ];
+      let rincianBulan = '';
+      if (daftarBulan.length === 1) {
+        rincianBulan = daftarBulan[0];
+      } else if (daftarBulan.length <= 4) {
+        const terakhir = daftarBulan[daftarBulan.length - 1];
+        const lainnya = daftarBulan.slice(0, -1).join(', ');
+        rincianBulan = `${lainnya} dan ${terakhir}`;
+      } else {
+        rincianBulan = `${daftarBulan[0]} s/d ${daftarBulan[daftarBulan.length - 1]}`;
+      }
 
-        // ==================== INISIALISASI SAAT HALAMAN DIMUAT ====================
-        window.addEventListener('DOMContentLoaded', async () => {
-            initSettingsUI();
-            initSupabaseConnection();
-            await loadAllData();
+      return {
+        isLunas: false,
+        text: `${jumlahBulanTagihan} Lembar (${rincianBulan})`
+      };
+    }
+
+    // Terapkan Logo & Tanggal Update ke seluruh layar
+    function applyBranding() {
+      const logoUrl = localStorage.getItem('pdam_logo_url') || '';
+      const imgIds = ['splash-logo-img', 'search-logo-img', 'bill-logo-img'];
+      const svgIds = ['splash-logo-svg', 'search-logo-svg', 'bill-logo-svg'];
+
+      imgIds.forEach((id, idx) => {
+        const imgEl = document.getElementById(id);
+        const svgEl = document.getElementById(svgIds[idx]);
+        if (logoUrl.trim()) {
+          imgEl.src = logoUrl.trim();
+          imgEl.classList.remove('hidden');
+          svgEl.classList.add('hidden');
+        } else {
+          imgEl.classList.add('hidden');
+          svgEl.classList.remove('hidden');
+        }
+      });
+
+      const dateObj = getUpdateDateObj();
+      document.getElementById('bill-tanggal-update').textContent = formatTanggalIndonesia(dateObj);
+
+      const yyyy = dateObj.getFullYear();
+      const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const dd = String(dateObj.getDate()).padStart(2, '0');
+      document.getElementById('cfg-update-date').value = `${yyyy}-${mm}-${dd}`;
+      document.getElementById('cfg-logo-url').value = logoUrl;
+    }
+
+    // Inisialisasi Koneksi Supabase
+    function initSupabase() {
+      const url = localStorage.getItem('pdam_sb_url') || '';
+      const key = localStorage.getItem('pdam_sb_key') || '';
+      document.getElementById('cfg-sb-url').value = url;
+      document.getElementById('cfg-sb-key').value = key;
+
+      const badge = document.getElementById('db-status-badge');
+      const demoHint = document.getElementById('demo-quick-hint');
+
+      if (url && key && window.supabase) {
+        try {
+          supabaseClient = window.supabase.createClient(url, key);
+          badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/25 text-emerald-100 font-semibold';
+          badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-300"></span> Terhubung Supabase Online';
+          demoHint.classList.add('hidden');
+        } catch (err) {
+          supabaseClient = null;
+        }
+      } else {
+        supabaseClient = null;
+        badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/25 text-amber-100 font-semibold';
+        badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-300"></span> Mode Demo Lokal';
+        demoHint.classList.remove('hidden');
+      }
+    }
+
+    // Navigasi Layar
+    function hideAllScreens() {
+      ['screen-splash', 'screen-search', 'screen-bill', 'screen-admin'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+    }
+
+    function goToSplash() {
+      hideAllScreens();
+      document.getElementById('screen-splash').classList.remove('hidden');
+    }
+
+    function goToSearch() {
+      hideAllScreens();
+      document.getElementById('screen-search').classList.remove('hidden');
+      document.getElementById('search-error').classList.add('hidden');
+      setTimeout(() => document.getElementById('input-no-pdam').focus(), 100);
+    }
+
+    function backToSearch() {
+      goToSearch();
+    }
+
+    function quickFill(noPdam) {
+      document.getElementById('input-no-pdam').value = noPdam;
+      handleSearchBill(new Event('submit'));
+    }
+
+    // Pencarian Tagihan Berdasarkan No. PDAM
+    async function handleSearchBill(e) {
+      e.preventDefault();
+      const inputVal = document.getElementById('input-no-pdam').value.trim().toUpperCase();
+      const errBox = document.getElementById('search-error');
+      const btn = document.getElementById('btn-cek-tagihan');
+
+      if (!inputVal) return;
+      errBox.classList.add('hidden');
+      btn.disabled = true;
+      btn.innerHTML = '<span>MENCARI DATA TAGIHAN...</span>';
+
+      try {
+        let record = null;
+
+        if (supabaseClient) {
+          const { data, error } = await supabaseClient
+            .from('customers')
+            .select('*')
+            .eq('no_pdam', inputVal)
+            .maybeSingle();
+
+          if (error) throw error;
+          record = data;
+        } else {
+          await loadLocalCustomers();
+          record = customersData.find(c => String(c.no_pdam).toUpperCase() === inputVal);
+        }
+
+        if (!record) {
+          errBox.textContent = `Data tagihan untuk No. PDAM "${inputVal}" tidak ditemukan. Periksa kembali nomor Anda.`;
+          errBox.classList.remove('hidden');
+          return;
+        }
+
+        renderBillSheet(record);
+      } catch (err) {
+        errBox.textContent = 'Terjadi gangguan koneksi database: ' + (err.message || err);
+        errBox.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/>
+          </svg>
+          <span>CEK TAGIHAN SEKARANG</span>
+        `;
+      }
+    }
+
+    // Tampilkan Lembar Tagihan Pelanggan
+    function renderBillSheet(data) {
+      const periodeInfo = formatPeriodeRekening(data.jumlah_rekening);
+      const isLunas = periodeInfo.isLunas;
+
+      const tagihanAir = isLunas ? 0 : (Number(data.tagihan_air) || 0);
+      const nonAir = isLunas ? 0 : (Number(data.non_air) || 0);
+      const denda = isLunas ? 0 : (Number(data.denda) || 0);
+      const jumlah = isLunas ? 0 : (Number(data.jumlah) || (tagihanAir + nonAir + denda));
+
+      document.getElementById('bill-tanggal-update').textContent = formatTanggalIndonesia(getUpdateDateObj());
+      document.getElementById('bill-no-pdam').textContent = data.no_pdam;
+      document.getElementById('bill-alamat').textContent = data.alamat || '-';
+
+      const periodeEl = document.getElementById('bill-periode');
+      if (isLunas) {
+        periodeEl.innerHTML = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold">✓ ${periodeInfo.text}</span>`;
+      } else {
+        periodeEl.innerHTML = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-xs font-extrabold">${periodeInfo.text}</span>`;
+      }
+
+      document.getElementById('bill-tagihan-air').textContent = formatRupiah(tagihanAir);
+      document.getElementById('bill-non-air').textContent = formatRupiah(nonAir);
+      document.getElementById('bill-denda').textContent = formatRupiah(denda);
+      document.getElementById('bill-jumlah').textContent = formatRupiah(jumlah);
+
+      hideAllScreens();
+      document.getElementById('screen-bill').classList.remove('hidden');
+    }
+
+    // =========================================================
+    // FUNGSI KHUSUS ADMIN
+    // =========================================================
+    function openAdminLogin() {
+      document.getElementById('admin-login-error').classList.add('hidden');
+      document.getElementById('modal-admin-login').classList.remove('hidden');
+      setTimeout(() => document.getElementById('admin-user').focus(), 100);
+    }
+
+    function closeAdminLogin() {
+      document.getElementById('modal-admin-login').classList.add('hidden');
+    }
+
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      const user = document.getElementById('admin-user').value.trim();
+      const pass = document.getElementById('admin-pass').value.trim();
+      const err = document.getElementById('admin-login-error');
+
+      if (user === 'admin' && pass === 'tirta123') {
+        closeAdminLogin();
+        document.getElementById('admin-user').value = '';
+        document.getElementById('admin-pass').value = '';
+        openAdminDashboard();
+      } else {
+        err.textContent = 'Username atau Password Admin salah!';
+        err.classList.remove('hidden');
+      }
+    }
+
+    async function openAdminDashboard() {
+      hideAllScreens();
+      document.getElementById('screen-admin').classList.remove('hidden');
+      updateAdminFormPreview();
+      await loadCustomers();
+    }
+
+    function logoutAdmin() {
+      goToSplash();
+    }
+
+    function openSqlModal() {
+      document.getElementById('modal-sql').classList.remove('hidden');
+    }
+
+    function closeSqlModal() {
+      document.getElementById('modal-sql').classList.add('hidden');
+    }
+
+    function copySqlCode() {
+      const code = document.getElementById('sql-code-block').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('Skrip SQL berhasil disalin! Silakan tempel di SQL Editor Supabase Anda.');
+      });
+    }
+
+    function saveSupabaseConfig() {
+      const url = document.getElementById('cfg-sb-url').value.trim();
+      const key = document.getElementById('cfg-sb-key').value.trim();
+      if (!url || !key) {
+        alert('Harap isi Supabase Project URL dan Anon Key.');
+        return;
+      }
+      localStorage.setItem('pdam_sb_url', url);
+      localStorage.setItem('pdam_sb_key', key);
+      initSupabase();
+      loadCustomers();
+      alert('Konfigurasi Supabase berhasil disimpan dan dihubungkan!');
+    }
+
+    function resetSupabaseConfig() {
+      localStorage.removeItem('pdam_sb_url');
+      localStorage.removeItem('pdam_sb_key');
+      initSupabase();
+      loadCustomers();
+      alert('Koneksi Supabase diputus. Kembali ke Mode Demo Lokal.');
+    }
+
+    function saveAppSettings() {
+      const dateVal = document.getElementById('cfg-update-date').value;
+      const logoVal = document.getElementById('cfg-logo-url').value.trim();
+      if (dateVal) localStorage.setItem('pdam_update_date', dateVal);
+      localStorage.setItem('pdam_logo_url', logoVal);
+      applyBranding();
+      updateAdminFormPreview();
+      renderAdminTable();
+      alert('Pengaturan Tanggal Update & Logo berhasil disimpan!');
+    }
+
+    function updateAdminFormPreview() {
+      const jmlRek = document.getElementById('f-jumlah-rekening').value;
+      const info = formatPeriodeRekening(jmlRek);
+      const el = document.getElementById('f-periode-preview');
+      el.textContent = info.text;
+      el.className = info.isLunas ? 'font-extrabold text-emerald-700' : 'font-extrabold text-amber-700';
+    }
+
+    function autoCalcJumlah() {
+      const air = Number(document.getElementById('f-tagihan-air').value) || 0;
+      const nonAir = Number(document.getElementById('f-non-air').value) || 0;
+      const denda = Number(document.getElementById('f-denda').value) || 0;
+      document.getElementById('f-jumlah').value = air + nonAir + denda;
+    }
+
+    function resetCustomerForm() {
+      document.getElementById('form-title').textContent = 'Tambah / Update Data Tagihan Pelanggan';
+      document.getElementById('f-no-pdam').value = '';
+      document.getElementById('f-no-pdam').readOnly = false;
+      document.getElementById('f-alamat').value = '';
+      document.getElementById('f-tagihan-air').value = 0;
+      document.getElementById('f-non-air').value = 0;
+      document.getElementById('f-denda').value = 0;
+      document.getElementById('f-jumlah').value = 0;
+      document.getElementById('f-jumlah-rekening').value = 1;
+      updateAdminFormPreview();
+    }
+
+    function editCustomer(noPdam) {
+      const item = customersData.find(c => c.no_pdam === noPdam);
+      if (!item) return;
+      document.getElementById('form-title').textContent = `Edit Data Tagihan — No. PDAM ${item.no_pdam}`;
+      document.getElementById('f-no-pdam').value = item.no_pdam;
+      document.getElementById('f-alamat').value = item.alamat;
+      document.getElementById('f-tagihan-air').value = item.tagihan_air;
+      document.getElementById('f-non-air').value = item.non_air;
+      document.getElementById('f-denda').value = item.denda;
+      document.getElementById('f-jumlah').value = item.jumlah;
+      document.getElementById('f-jumlah-rekening').value = item.jumlah_rekening;
+      updateAdminFormPreview();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function loadLocalCustomers() {
+      const raw = localStorage.getItem('pdam_demo_customers');
+      if (raw) {
+        customersData = JSON.parse(raw);
+      } else {
+        customersData = [...DEFAULT_CUSTOMERS];
+        localStorage.setItem('pdam_demo_customers', JSON.stringify(customersData));
+      }
+    }
+
+    async function loadCustomers() {
+      try {
+        if (supabaseClient) {
+          const { data, error } = await supabaseClient
+            .from('customers')
+            .select('*')
+            .order('no_pdam', { ascending: true });
+          if (error) throw error;
+          customersData = data || [];
+        } else {
+          await loadLocalCustomers();
+        }
+        renderAdminTable();
+      } catch (err) {
+        alert('Gagal memuat data dari database: ' + (err.message || err));
+      }
+    }
+
+    async function handleSaveCustomer(e) {
+      e.preventDefault();
+      const payload = {
+        no_pdam: document.getElementById('f-no-pdam').value.trim().toUpperCase(),
+        alamat: document.getElementById('f-alamat').value.trim().toUpperCase(),
+        tagihan_air: Number(document.getElementById('f-tagihan-air').value) || 0,
+        non_air: Number(document.getElementById('f-non-air').value) || 0,
+        denda: Number(document.getElementById('f-denda').value) || 0,
+        jumlah: Number(document.getElementById('f-jumlah').value) || 0,
+        jumlah_rekening: parseInt(document.getElementById('f-jumlah-rekening').value, 10) || 0
+      };
+
+      try {
+        if (supabaseClient) {
+          const { error } = await supabaseClient
+            .from('customers')
+            .upsert(payload, { onConflict: 'no_pdam' });
+          if (error) throw error;
+        } else {
+          const idx = customersData.findIndex(c => c.no_pdam === payload.no_pdam);
+          if (idx >= 0) customersData[idx] = payload;
+          else customersData.push(payload);
+          localStorage.setItem('pdam_demo_customers', JSON.stringify(customersData));
+        }
+        resetCustomerForm();
+        await loadCustomers();
+        alert(`Data No. PDAM ${payload.no_pdam} berhasil disimpan!`);
+      } catch (err) {
+        alert('Gagal menyimpan data: ' + (err.message || err));
+      }
+    }
+
+    async function deleteCustomer(noPdam) {
+      if (!confirm(`Hapus data tagihan untuk No. PDAM ${noPdam}?`)) return;
+      try {
+        if (supabaseClient) {
+          const { error } = await supabaseClient
+            .from('customers')
+            .delete()
+            .eq('no_pdam', noPdam);
+          if (error) throw error;
+        } else {
+          customersData = customersData.filter(c => c.no_pdam !== noPdam);
+          localStorage.setItem('pdam_demo_customers', JSON.stringify(customersData));
+        }
+        await loadCustomers();
+      } catch (err) {
+        alert('Gagal menghapus data: ' + (err.message || err));
+      }
+    }
+
+    // Parse Angka Rupiah Bersih dari Excel/CSV
+    function parseCleanNumber(val) {
+      if (val === undefined || val === null) return 0;
+      const cleaned = String(val).replace(/[^0-9-]/g, '');
+      return Number(cleaned) || 0;
+    }
+
+    // Import Massal 7 Kolom (Tab / Titik Koma / Koma)
+    async function handleBulkImport() {
+      const rawText = document.getElementById('bulk-import-text').value.trim();
+      if (!rawText) {
+        alert('Silakan tempel (paste) data dari Excel atau CSV terlebih dahulu.');
+        return;
+      }
+
+      const lines = rawText.split(/\r?\n/).filter(line => line.trim() !== '');
+      const recordsMap = new Map();
+
+      lines.forEach(line => {
+        const delimiter = line.includes('\t') ? '\t' : (line.includes(';') ? ';' : ',');
+        const cols = line.split(delimiter).map(c => c.trim());
+        if (cols.length < 2) return;
+
+        // Lewati baris header jika ada
+        const firstCol = cols[0].toUpperCase();
+        if (firstCol === 'NO. PDAM' || firstCol === 'NO PDAM' || firstCol === 'NO_PDAM') return;
+
+        const no_pdam = firstCol;
+        const alamat = (cols[1] || '-').toUpperCase();
+        const tagihan_air = parseCleanNumber(cols[2]);
+        const non_air = parseCleanNumber(cols[3]);
+        const denda = parseCleanNumber(cols[4]);
+        const jumlah = cols[5] !== undefined && cols[5] !== ''
+          ? parseCleanNumber(cols[5])
+          : (tagihan_air + non_air + denda);
+        const jumlah_rekening = cols[6] !== undefined && cols[6] !== ''
+          ? parseInt(parseCleanNumber(cols[6]), 10)
+          : 1;
+
+        recordsMap.set(no_pdam, {
+          no_pdam,
+          alamat,
+          tagihan_air,
+          non_air,
+          denda,
+          jumlah,
+          jumlah_rekening
         });
+      });
 
-        function getFormattedTodayIndo() {
-            const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-            const bulan = [
-                'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-            ];
-            const now = new Date();
-            return `${hari[now.getDay()]}, ${now.getDate()} ${bulan[now.getMonth()]} ${now.getFullYear()}`;
+      const records = Array.from(recordsMap.values());
+      if (records.length === 0) {
+        alert('Format data tidak valid. Pastikan urutan 7 kolom sesuai panduan.');
+        return;
+      }
+
+      try {
+        if (supabaseClient) {
+          const { error } = await supabaseClient
+            .from('customers')
+            .upsert(records, { onConflict: 'no_pdam' });
+          if (error) throw error;
+        } else {
+          records.forEach(rec => {
+            const idx = customersData.findIndex(c => c.no_pdam === rec.no_pdam);
+            if (idx >= 0) customersData[idx] = rec;
+            else customersData.push(rec);
+          });
+          localStorage.setItem('pdam_demo_customers', JSON.stringify(customersData));
         }
 
-        function formatRupiah(angka) {
-            const num = Number(angka) || 0;
-            return 'Rp ' + num.toLocaleString('id-ID');
-        }
-
-        function quickFillRegister(noReg) {
-            const input = document.getElementById('input-no-register');
-            if (input) {
-                input.value = noReg;
-                input.focus();
-            }
-        }
-
-        // ==================== KONVERSI PERIODE KE STATUS LUNAS / BULAN TAGIHAN ====================
-        function parseReferenceMonthYear(dateString) {
-            const bulanIndo = [
-                'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-            ];
-            const now = new Date();
-            let monthIdx = now.getMonth();
-            let year = now.getFullYear();
-
-            if (dateString && typeof dateString === 'string') {
-                const lowerStr = dateString.toLowerCase();
-                const foundMonth = bulanIndo.findIndex(b => lowerStr.includes(b.toLowerCase()));
-                if (foundMonth !== -1) {
-                    monthIdx = foundMonth;
-                }
-                const yearMatch = dateString.match(/\b(20\d{2})\b/);
-                if (yearMatch) {
-                    year = parseInt(yearMatch[1], 10);
-                }
-            }
-            return { monthIdx, year, bulanIndo };
-        }
-
-        function formatDaftarBulanDenganDan(daftarBulan) {
-            if (daftarBulan.length === 0) return '';
-            if (daftarBulan.length === 1) return daftarBulan[0];
-            if (daftarBulan.length === 2) return `${daftarBulan[0]} dan ${daftarBulan[1]}`;
-            const semuaKecualiTerakhir = daftarBulan.slice(0, -1).join(', ');
-            const terakhir = daftarBulan[daftarBulan.length - 1];
-            return `${semuaKecualiTerakhir}, dan ${terakhir}`;
-        }
-
-        function formatPeriodeRekening(periodeAngka, refDateString) {
-            const n = parseInt(periodeAngka, 10) || 0;
-
-            // Aturan 1: 0 atau 1 lembar menyatakan tagihan LUNAS
-            if (n <= 1) {
-                return `LUNAS (${n} Lembar)`;
-            }
-
-            // Aturan 2: >= 2 lembar menyatakan (n - 1) bulan tagihan, mundur dari bulan sebelum bulan berjalan
-            const globalDate = localStorage.getItem(STORAGE_KEYS.TANGGAL_UPDATE) || getFormattedTodayIndo();
-            const activeDate = (refDateString && refDateString.trim() !== '') ? refDateString : globalDate;
-            const { monthIdx, year, bulanIndo } = parseReferenceMonthYear(activeDate);
-
-            const jumlahBulanTagihan = n - 1;
-            const daftarBulan = [];
-
-            // Hitung mundur mulai dari H-1 bulan (offset = 1) sampai offset = jumlahBulanTagihan
-            for (let offset = 1; offset <= jumlahBulanTagihan; offset++) {
-                const totalMonths = year * 12 + monthIdx - offset;
-                const targetYear = Math.floor(totalMonths / 12);
-                const targetMonthIdx = ((totalMonths % 12) + 12) % 12;
-                daftarBulan.push(`${bulanIndo[targetMonthIdx]} ${targetYear}`);
-            }
-
-            const rincianBulan = formatDaftarBulanDenganDan(daftarBulan);
-
-            if (jumlahBulanTagihan <= 4) {
-                return `${jumlahBulanTagihan} Lembar (${rincianBulan})`;
-            } else {
-                const bulanTerbaru = daftarBulan[0];
-                const bulanTerlama = daftarBulan[daftarBulan.length - 1];
-                return `${jumlahBulanTagihan} Lembar: ${bulanTerbaru} s/d ${bulanTerlama} (${rincianBulan})`;
-            }
-        }
-
-        function updateAdminPeriodePreview() {
-            const previewEl = document.getElementById('admin-periode-preview');
-            if (!previewEl) return;
-            const val = parseInt(document.getElementById('f-periode').value, 10) || 0;
-            const customDate = document.getElementById('f-tanggal-update').value;
-            const label = formatPeriodeRekening(val, customDate);
-
-            if (val <= 1) {
-                previewEl.className = 'text-[11px] font-bold text-emerald-700 block mt-1';
-                previewEl.textContent = `Preview: ${label} • Total Tagihan Otomatis Rp 0`;
-            } else {
-                const air = Number(document.getElementById('f-tagihan-air')?.value) || 0;
-                const nonAir = Number(document.getElementById('f-tagihan-non-air')?.value) || 0;
-                const denda = Number(document.getElementById('f-denda')?.value) || 0;
-                const total = air + nonAir + denda;
-                previewEl.className = 'text-[11px] font-bold text-amber-700 block mt-1';
-                previewEl.textContent = `Preview: ${label} • Total: ${formatRupiah(total)}`;
-            }
-        }
-
-        // ==================== NAVIGASI ANTAR LAYAR ====================
-        function navigateTo(viewId) {
-            const views = ['view-splash', 'view-search', 'view-bill', 'view-admin'];
-            views.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.add('hidden');
-            });
-
-            // Proteksi ketat halaman Admin
-            if (viewId === 'view-admin') {
-                const isLogged = sessionStorage.getItem(STORAGE_KEYS.ADMIN_SESSION) === 'true';
-                if (!isLogged) {
-                    openAdminLoginModal();
-                    document.getElementById('view-splash').classList.remove('hidden');
-                    return;
-                }
-            }
-
-            const target = document.getElementById(viewId);
-            if (target) {
-                target.classList.remove('hidden');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-
-            if (viewId === 'view-search') {
-                setTimeout(() => document.getElementById('input-no-register').focus(), 150);
-            }
-        }
-
-        // ==================== PENGATURAN LOGO & TANGGAL UPDATE ====================
-        function initSettingsUI() {
-            const savedLogo = localStorage.getItem(STORAGE_KEYS.LOGO_URL) || '';
-            const savedDate = localStorage.getItem(STORAGE_KEYS.TANGGAL_UPDATE) || getFormattedTodayIndo();
-            const savedPass = localStorage.getItem(STORAGE_KEYS.ADMIN_PASS) || 'tirta123';
-
-            document.getElementById('cfg-logo-url').value = savedLogo;
-            document.getElementById('cfg-tanggal-update').value = savedDate;
-            document.getElementById('cfg-admin-pass').value = savedPass;
-
-            document.getElementById('info-last-update-badge').textContent = `Update: ${savedDate}`;
-            applyCustomLogo(savedLogo);
-            updateAdminPeriodePreview();
-        }
-
-        function applyCustomLogo(url) {
-            const splashImg = document.getElementById('splash-logo-img');
-            const splashSvg = document.getElementById('splash-logo-svg');
-            const searchImg = document.getElementById('search-logo-img');
-            const searchIcon = document.getElementById('search-logo-icon');
-            const billImg = document.getElementById('bill-logo-img');
-            const billSvg = document.getElementById('bill-logo-svg');
-
-            if (url && url.trim() !== '') {
-                splashImg.src = url;
-                splashImg.classList.remove('hidden');
-                splashSvg.classList.add('hidden');
-
-                searchImg.src = url;
-                searchImg.classList.remove('hidden');
-                searchIcon.classList.add('hidden');
-
-                billImg.src = url;
-                billImg.classList.remove('hidden');
-                billSvg.classList.add('hidden');
-            } else {
-                splashImg.classList.add('hidden');
-                splashSvg.classList.remove('hidden');
-
-                searchImg.classList.add('hidden');
-                searchIcon.classList.remove('hidden');
-
-                billImg.classList.add('hidden');
-                billSvg.classList.remove('hidden');
-            }
-        }
-
-        function saveInstanceSettings() {
-            const newDate = document.getElementById('cfg-tanggal-update').value.trim() || getFormattedTodayIndo();
-            const newLogo = document.getElementById('cfg-logo-url').value.trim();
-            const newPass = document.getElementById('cfg-admin-pass').value.trim() || 'tirta123';
-
-            localStorage.setItem(STORAGE_KEYS.TANGGAL_UPDATE, newDate);
-            localStorage.setItem(STORAGE_KEYS.LOGO_URL, newLogo);
-            localStorage.setItem(STORAGE_KEYS.ADMIN_PASS, newPass);
-
-            document.getElementById('info-last-update-badge').textContent = `Update: ${newDate}`;
-            applyCustomLogo(newLogo);
-            updateAdminPeriodePreview();
-            renderAdminTable();
-            showToast('Pengaturan instansi berhasil disimpan!', 'success');
-        }
-
-        // ==================== KONEKSI SUPABASE ====================
-        function initSupabaseConnection() {
-            const url = localStorage.getItem(STORAGE_KEYS.SUPABASE_URL) || DEFAULT_SUPABASE_URL;
-            const key = localStorage.getItem(STORAGE_KEYS.SUPABASE_KEY) || DEFAULT_SUPABASE_KEY;
-
-            document.getElementById('cfg-supabase-url').value = url;
-            document.getElementById('cfg-supabase-key').value = key;
-
-            const statusAdmin = document.getElementById('admin-conn-status');
-            const statusPublic = document.getElementById('db-status-indicator');
-            const demoChips = document.getElementById('demo-quick-chips');
-
-            if (url && key && window.supabase) {
-                try {
-                    supabaseClient = window.supabase.createClient(url, key);
-                    statusAdmin.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> <span class="text-emerald-700">Terhubung ke Supabase Online</span>`;
-                    statusPublic.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> <span>Terhubung Server Online</span>`;
-                    if (demoChips) demoChips.classList.add('hidden');
-                } catch (err) {
-                    supabaseClient = null;
-                    statusAdmin.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-600"></i> <span class="text-rose-600">Gagal inisialisasi Supabase</span>`;
-                    if (demoChips) demoChips.classList.remove('hidden');
-                }
-            } else {
-                supabaseClient = null;
-                statusAdmin.innerHTML = `<i class="fa-solid fa-circle-dot text-amber-500"></i> <span>Mode Demo Lokal (Isi URL & Key untuk Online)</span>`;
-                statusPublic.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span> <span>Mode Demo Aktif</span>`;
-                if (demoChips) demoChips.classList.remove('hidden');
-            }
-        }
-
-        async function saveSupabaseConfig() {
-            const url = document.getElementById('cfg-supabase-url').value.trim();
-            const key = document.getElementById('cfg-supabase-key').value.trim();
-
-            localStorage.setItem(STORAGE_KEYS.SUPABASE_URL, url);
-            localStorage.setItem(STORAGE_KEYS.SUPABASE_KEY, key);
-
-            initSupabaseConnection();
-            await loadAllData();
-            showToast('Konfigurasi Supabase diperbarui!', 'success');
-        }
-
-        // ==================== DATA ACCESS LAYER (SUPABASE + FALLBACK LOKAL) ====================
-        function getDemoData() {
-            const raw = localStorage.getItem(STORAGE_KEYS.DEMO_DATA);
-            if (!raw) {
-                localStorage.setItem(STORAGE_KEYS.DEMO_DATA, JSON.stringify(INITIAL_DEMO_DATA));
-                return [...INITIAL_DEMO_DATA];
-            }
-            return JSON.parse(raw);
-        }
-
-        function setDemoData(arr) {
-            localStorage.setItem(STORAGE_KEYS.DEMO_DATA, JSON.stringify(arr));
-        }
-
-        async function loadAllData() {
-            if (supabaseClient) {
-                try {
-                    const { data, error } = await supabaseClient
-                        .from('tagihan_pelanggan')
-                        .select('*')
-                        .order('no_register', { ascending: true });
-
-                    if (error) throw error;
-                    allBillsData = data || [];
-                    renderAdminTable();
-                    return;
-                } catch (err) {
-                    console.error('Supabase fetch error:', err);
-                    showToast('Gagal mengambil data dari Supabase. Cek tabel/RLS Anda.', 'error');
-                }
-            }
-
-            // Fallback ke LocalStorage Demo Data
-            allBillsData = getDemoData();
-            renderAdminTable();
-        }
-
-        // ==================== LOGIKA CEK TAGIHAN PELANGGAN ====================
-        async function handleCheckBill(e) {
-            e.preventDefault();
-            const inputEl = document.getElementById('input-no-register');
-            const noReg = inputEl.value.trim().toUpperCase();
-
-            if (!noReg) {
-                showToast('Silakan masukkan Nomor Register Pelanggan.', 'error');
-                return;
-            }
-
-            const btn = document.getElementById('btn-submit-cek');
-            const originalHtml = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>MENCARI DATA...</span>`;
-
-            let foundRecord = null;
-
-            try {
-                if (supabaseClient) {
-                    const { data, error } = await supabaseClient
-                        .from('tagihan_pelanggan')
-                        .select('*')
-                        .eq('no_register', noReg)
-                        .maybeSingle();
-
-                    if (error) throw error;
-                    foundRecord = data;
-                } else {
-                    const localList = getDemoData();
-                    foundRecord = localList.find(item => String(item.no_register).toUpperCase() === noReg);
-                }
-
-                if (!foundRecord) {
-                    showToast(`Nomor Register "${noReg}" tidak ditemukan atau tidak memiliki tunggakan.`, 'error');
-                } else {
-                    displayBillSheet(foundRecord);
-                    navigateTo('view-bill');
-                }
-            } catch (err) {
-                console.error(err);
-                showToast('Terjadi kesalahan koneksi ke server.', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = originalHtml;
-            }
-        }
-
-        // Menampilkan Data ke Lembar Tagihan Resmi
-        function displayBillSheet(data) {
-            const globalUpdateDate = localStorage.getItem(STORAGE_KEYS.TANGGAL_UPDATE) || getFormattedTodayIndo();
-            const displayDate = data.tanggal_update && data.tanggal_update.trim() !== '' ? data.tanggal_update : globalUpdateDate;
-
-            document.getElementById('bill-tanggal-update').textContent = displayDate;
-            document.getElementById('bill-no-register').textContent = data.no_register;
-            document.getElementById('bill-nama').textContent = data.nama;
-            document.getElementById('bill-alamat').textContent = data.alamat;
-
-            // LOGIKA PERIODE REKENING & KALKULASI TAGIHAN:
-            // 0 atau 1 lembar = LUNAS (seluruh rincian tagihan otomatis Rp 0)
-            // >= 2 lembar = (n - 1) Bulan Tagihan mulai dari H-1 bulan berjalan (nominal sesuai database)
-            const periodeNum = parseInt(data.periode_angka, 10) || 0;
-            const periodeBadge = document.getElementById('bill-periode-badge');
-            const periodeText = formatPeriodeRekening(periodeNum, displayDate);
-
-            let air = 0;
-            let nonAir = 0;
-            let denda = 0;
-
-            if (periodeNum <= 1) {
-                periodeBadge.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> <span>${periodeText}</span>`;
-                periodeBadge.className = 'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300';
-            } else {
-                periodeBadge.innerHTML = `<i class="fa-solid fa-clock text-amber-600"></i> <span>${periodeText}</span>`;
-                periodeBadge.className = 'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-extrabold bg-amber-100 text-amber-900 border border-amber-300';
-                air = Number(data.tagihan_air) || 0;
-                nonAir = Number(data.tagihan_non_air) || 0;
-                denda = Number(data.denda) || 0;
-            }
-
-            const total = air + nonAir + denda;
-
-            document.getElementById('bill-tagihan-air').textContent = formatRupiah(air);
-            document.getElementById('bill-tagihan-non-air').textContent = formatRupiah(nonAir);
-            document.getElementById('bill-denda').textContent = formatRupiah(denda);
-            document.getElementById('bill-total').textContent = formatRupiah(total);
-        }
-
-        // ==================== AUTENTIKASI & KONTROL ADMIN ====================
-        function openAdminAccess() {
-            const isLogged = sessionStorage.getItem(STORAGE_KEYS.ADMIN_SESSION) === 'true';
-            if (isLogged) {
-                navigateTo('view-admin');
-            } else {
-                openAdminLoginModal();
-            }
-        }
-
-        function openAdminLoginModal() {
-            document.getElementById('modal-admin-login').classList.remove('hidden');
-            setTimeout(() => document.getElementById('admin-username').focus(), 100);
-        }
-
-        function closeAdminLoginModal() {
-            document.getElementById('modal-admin-login').classList.add('hidden');
-        }
-
-        function handleAdminLogin(e) {
-            e.preventDefault();
-            const user = document.getElementById('admin-username').value.trim();
-            const pass = document.getElementById('admin-password').value.trim();
-            const validPass = localStorage.getItem(STORAGE_KEYS.ADMIN_PASS) || 'tirta123';
-
-            if (user.toLowerCase() === 'admin' && pass === validPass) {
-                sessionStorage.setItem(STORAGE_KEYS.ADMIN_SESSION, 'true');
-                closeAdminLoginModal();
-                document.getElementById('admin-password').value = '';
-                showToast('Selamat datang, Admin Perumda Tirta Indragiri!', 'success');
-                navigateTo('view-admin');
-                loadAllData();
-            } else {
-                showToast('Username atau Password Admin salah!', 'error');
-            }
-        }
-
-        function handleAdminLogout() {
-            sessionStorage.removeItem(STORAGE_KEYS.ADMIN_SESSION);
-            showToast('Anda telah keluar dari sesi Admin.', 'info');
-            navigateTo('view-splash');
-        }
-
-        // ==================== CRUD DATA TAGIHAN DI PANEL ADMIN ====================
-        async function handleSavePelanggan(e) {
-            e.preventDefault();
-            const defaultDate = localStorage.getItem(STORAGE_KEYS.TANGGAL_UPDATE) || getFormattedTodayIndo();
-
-            const record = {
-                no_register: document.getElementById('f-no-register').value.trim().toUpperCase(),
-                nama: document.getElementById('f-nama').value.trim().toUpperCase(),
-                alamat: document.getElementById('f-alamat').value.trim().toUpperCase(),
-                periode_angka: parseInt(document.getElementById('f-periode').value, 10) || 0,
-                tagihan_air: Number(document.getElementById('f-tagihan-air').value) || 0,
-                tagihan_non_air: Number(document.getElementById('f-tagihan-non-air').value) || 0,
-                denda: Number(document.getElementById('f-denda').value) || 0,
-                tanggal_update: document.getElementById('f-tanggal-update').value.trim() || defaultDate
-            };
-
-            if (supabaseClient) {
-                try {
-                    const { error } = await supabaseClient
-                        .from('tagihan_pelanggan')
-                        .upsert(record, { onConflict: 'no_register' });
-
-                    if (error) throw error;
-                    showToast(`Data No. Reg ${record.no_register} berhasil disimpan ke Supabase!`, 'success');
-                } catch (err) {
-                    console.error(err);
-                    showToast('Gagal menyimpan ke Supabase: ' + err.message, 'error');
-                    return;
-                }
-            } else {
-                const list = getDemoData();
-                const idx = list.findIndex(x => x.no_register === record.no_register);
-                if (idx >= 0) {
-                    list[idx] = record;
-                } else {
-                    list.push(record);
-                }
-                setDemoData(list);
-                showToast(`Data No. Reg ${record.no_register} tersimpan (Mode Lokal)!`, 'success');
-            }
-
-            resetFormPelanggan();
-            await loadAllData();
-        }
-
-        function editPelanggan(noReg) {
-            const item = allBillsData.find(x => x.no_register === noReg);
-            if (!item) return;
-
-            document.getElementById('f-no-register').value = item.no_register;
-            document.getElementById('f-nama').value = item.nama;
-            document.getElementById('f-alamat').value = item.alamat;
-            document.getElementById('f-periode').value = item.periode_angka;
-            document.getElementById('f-tagihan-air').value = item.tagihan_air;
-            document.getElementById('f-tagihan-non-air').value = item.tagihan_non_air;
-            document.getElementById('f-denda').value = item.denda;
-            document.getElementById('f-tanggal-update').value = item.tanggal_update || '';
-
-            updateAdminPeriodePreview();
-            document.getElementById('f-no-register').focus();
-            showToast(`Mengedit data No. Register ${noReg}`, 'info');
-        }
-
-        async function deletePelanggan(noReg) {
-            if (supabaseClient) {
-                try {
-                    const { error } = await supabaseClient
-                        .from('tagihan_pelanggan')
-                        .delete()
-                        .eq('no_register', noReg);
-                    if (error) throw error;
-                    showToast(`Data ${noReg} dihapus dari Supabase.`, 'success');
-                } catch (err) {
-                    showToast('Gagal menghapus data: ' + err.message, 'error');
-                    return;
-                }
-            } else {
-                const filtered = getDemoData().filter(x => x.no_register !== noReg);
-                setDemoData(filtered);
-                showToast(`Data ${noReg} dihapus.`, 'success');
-            }
-            await loadAllData();
-        }
-
-        function resetFormPelanggan() {
-            document.getElementById('form-admin-pelanggan').reset();
-            document.getElementById('f-periode').value = 1;
-            document.getElementById('f-tagihan-air').value = 0;
-            document.getElementById('f-tagihan-non-air').value = 0;
-            document.getElementById('f-denda').value = 0;
-            updateAdminPeriodePreview();
-        }
-
-        function renderAdminTable() {
-            const tbody = document.getElementById('admin-table-body');
-            const query = (document.getElementById('admin-search-table').value || '').toLowerCase();
-
-            const filtered = allBillsData.filter(item =>
-                String(item.no_register).toLowerCase().includes(query) ||
-                String(item.nama).toLowerCase().includes(query) ||
-                String(item.alamat).toLowerCase().includes(query)
-            );
-
-            document.getElementById('total-records-count').textContent = filtered.length;
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="8" class="py-8 text-center text-slate-400 text-sm">
-                            Belum ada data tagihan yang sesuai.
-                        </td>
-                    </tr>`;
-                return;
-            }
-
-            tbody.innerHTML = filtered.map(item => {
-                const pNum = parseInt(item.periode_angka, 10) || 0;
-                const pLabel = formatPeriodeRekening(pNum, item.tanggal_update);
-                const isLunas = pNum <= 1;
-                const air = isLunas ? 0 : (Number(item.tagihan_air) || 0);
-                const nonAir = isLunas ? 0 : (Number(item.tagihan_non_air) || 0);
-                const denda = isLunas ? 0 : (Number(item.denda) || 0);
-                const total = air + nonAir + denda;
-
-                return `
-                    <tr class="hover:bg-sky-50/50 transition">
-                        <td class="py-3 px-4 font-extrabold text-sky-800 whitespace-nowrap">${item.no_register}</td>
-                        <td class="py-3 px-4">
-                            <div class="font-bold text-slate-900">${item.nama}</div>
-                            <div class="text-xs text-slate-500">${item.alamat}</div>
-                        </td>
-                        <td class="py-3 px-4 whitespace-nowrap">
-                            <span class="px-2.5 py-1 rounded-md text-xs font-bold ${isLunas ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
-                                ${pLabel}
-                            </span>
-                        </td>
-                        <td class="py-3 px-4 text-right font-medium text-slate-700 whitespace-nowrap">${formatRupiah(air)}</td>
-                        <td class="py-3 px-4 text-right font-medium text-slate-700 whitespace-nowrap">${formatRupiah(nonAir)}</td>
-                        <td class="py-3 px-4 text-right font-medium text-rose-600 whitespace-nowrap">${formatRupiah(denda)}</td>
-                        <td class="py-3 px-4 text-right font-extrabold text-slate-900 whitespace-nowrap">${formatRupiah(total)}</td>
-                        <td class="py-3 px-4 text-center whitespace-nowrap">
-                            <button onclick="editPelanggan('${item.no_register}')" title="Edit" class="p-2 text-sky-700 hover:bg-sky-100 rounded-lg transition">
-                                <i class="fa-solid fa-pen-to-square"></i>
-                            </button>
-                            <button onclick="deletePelanggan('${item.no_register}')" title="Hapus" class="p-2 text-rose-600 hover:bg-rose-100 rounded-lg transition">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        // ==================== IMPORT MASSAL CSV / EXCEL ====================
-        function openBulkImportModal() {
-            document.getElementById('modal-bulk-import').classList.remove('hidden');
-        }
-
-        function closeBulkImportModal() {
-            document.getElementById('modal-bulk-import').classList.add('hidden');
-        }
-
-        function handleCsvFileUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                document.getElementById('bulk-paste-area').value = evt.target.result;
-            };
-            reader.readAsText(file);
-        }
-
-        async function processBulkImport() {
-            const rawText = document.getElementById('bulk-paste-area').value.trim();
-            if (!rawText) {
-                showToast('Area data import masih kosong!', 'error');
-                return;
-            }
-
-            const defaultDate = localStorage.getItem(STORAGE_KEYS.TANGGAL_UPDATE) || getFormattedTodayIndo();
-            const lines = rawText.split(/\r?\n/).filter(l => l.trim() !== '');
-            const parsedRecords = [];
-
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i].trim();
-                // Skip header jika baris pertama berisi kata no_register
-                if (i === 0 && line.toLowerCase().includes('no_register')) continue;
-
-                // Deteksi pemisah: Tab (dari copy Excel), titik koma (;), atau koma (,)
-                let cols = line.includes('\t') ? line.split('\t') : (line.includes(';') ? line.split(';') : line.split(','));
-                cols = cols.map(c => c.trim().replace(/^"|"$/g, ''));
-
-                if (cols.length >= 3 && cols[0]) {
-                    parsedRecords.push({
-                        no_register: cols[0].toUpperCase(),
-                        nama: (cols[1] || 'PELANGGAN').toUpperCase(),
-                        alamat: (cols[2] || '-').toUpperCase(),
-                        periode_angka: parseInt(cols[3], 10) || 0,
-                        tagihan_air: Number(String(cols[4] || '0').replace(/[^0-9]/g, '')) || 0,
-                        tagihan_non_air: Number(String(cols[5] || '0').replace(/[^0-9]/g, '')) || 0,
-                        denda: Number(String(cols[6] || '0').replace(/[^0-9]/g, '')) || 0,
-                        tanggal_update: defaultDate
-                    });
-                }
-            }
-
-            if (parsedRecords.length === 0) {
-                showToast('Tidak ada baris valid yang terbaca. Periksa format kolom.', 'error');
-                return;
-            }
-
-            if (supabaseClient) {
-                try {
-                    const { error } = await supabaseClient
-                        .from('tagihan_pelanggan')
-                        .upsert(parsedRecords, { onConflict: 'no_register' });
-
-                    if (error) throw error;
-                    showToast(`Berhasil mengimport ${parsedRecords.length} data ke Supabase!`, 'success');
-                } catch (err) {
-                    showToast('Gagal import ke Supabase: ' + err.message, 'error');
-                    return;
-                }
-            } else {
-                const existing = getDemoData();
-                const map = new Map(existing.map(item => [item.no_register, item]));
-                parsedRecords.forEach(rec => map.set(rec.no_register, rec));
-                setDemoData(Array.from(map.values()));
-                showToast(`Berhasil mengimport ${parsedRecords.length} data (Mode Lokal)!`, 'success');
-            }
-
-            document.getElementById('bulk-paste-area').value = '';
-            closeBulkImportModal();
-            await loadAllData();
-        }
-
-        // ==================== MODAL SQL SETUP SUPABASE ====================
-        function openSqlModal() {
-            document.getElementById('modal-sql-setup').classList.remove('hidden');
-        }
-
-        function closeSqlModal() {
-            document.getElementById('modal-sql-setup').classList.add('hidden');
-        }
-
-        function copySqlCode() {
-            const sqlText = document.getElementById('sql-code-block').innerText;
-            const tempInput = document.createElement('textarea');
-            tempInput.value = sqlText;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
-            showToast('Query SQL berhasil disalin ke clipboard!', 'success');
-        }
-
-        // ==================== TOAST NOTIFICATION HELPER ====================
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-
-            const styles = {
-                success: 'bg-emerald-600 text-white border-emerald-400',
-                error: 'bg-rose-600 text-white border-rose-400',
-                info: 'bg-slate-800 text-white border-slate-600'
-            };
-
-            const icons = {
-                success: 'fa-circle-check',
-                error: 'fa-circle-exclamation',
-                info: 'fa-circle-info'
-            };
-
-            toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl border text-xs sm:text-sm font-semibold transition-all duration-300 ${styles[type] || styles.info}`;
-            toast.innerHTML = `
-                <i class="fa-solid ${icons[type] || icons.info} text-base"></i>
-                <span class="flex-1">${message}</span>
-            `;
-
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(-10px)';
-                setTimeout(() => toast.remove(), 300);
-            }, 3500);
-        }
-    </script>
+        document.getElementById('bulk-import-text').value = '';
+        await loadCustomers();
+        alert(`Berhasil mengimpor ${records.length} data tagihan pelanggan!`);
+      } catch (err) {
+        alert('Gagal melakukan import massal: ' + (err.message || err));
+      }
+    }
+
+    // Render Tabel Admin
+    function renderAdminTable() {
+      const tbody = document.getElementById('admin-table-body');
+      const keyword = (document.getElementById('admin-filter-input').value || '').trim().toUpperCase();
+
+      const filtered = customersData.filter(c =>
+        String(c.no_pdam).toUpperCase().includes(keyword) ||
+        String(c.alamat).toUpperCase().includes(keyword)
+      );
+
+      document.getElementById('total-records-count').textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="py-8 text-center text-slate-400 font-medium">
+              Tidak ada data tagihan pelanggan yang ditampilkan.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(c => {
+        const periode = formatPeriodeRekening(c.jumlah_rekening);
+        const badgeClass = periode.isLunas
+          ? 'bg-emerald-100 text-emerald-800'
+          : 'bg-amber-100 text-amber-900';
+
+        return `
+          <tr class="hover:bg-sky-50/50 transition">
+            <td class="py-3 px-4 font-extrabold text-slate-900">${c.no_pdam}</td>
+            <td class="py-3 px-4 text-slate-700">${c.alamat}</td>
+            <td class="py-3 px-4 text-right font-semibold">${formatRupiah(c.tagihan_air)}</td>
+            <td class="py-3 px-4 text-right font-semibold">${formatRupiah(c.non_air)}</td>
+            <td class="py-3 px-4 text-right font-semibold text-rose-600">${formatRupiah(c.denda)}</td>
+            <td class="py-3 px-4 text-right font-extrabold text-[#00529b]">${formatRupiah(c.jumlah)}</td>
+            <td class="py-3 px-4">
+              <span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-bold ${badgeClass}">
+                ${periode.text}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-center whitespace-nowrap">
+              <button onclick="editCustomer('${c.no_pdam}')" class="px-2.5 py-1 rounded-lg bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold mr-1 cursor-pointer">Edit</button>
+              <button onclick="deleteCustomer('${c.no_pdam}')" class="px-2.5 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold cursor-pointer">Hapus</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Jalankan Inisialisasi Awal
+    window.addEventListener('DOMContentLoaded', () => {
+      applyBranding();
+      initSupabase();
+    });
+  </script>
 </body>
 </html>
