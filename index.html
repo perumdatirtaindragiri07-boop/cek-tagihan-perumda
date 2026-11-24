@@ -480,7 +480,7 @@
                 Simpan & Hubungkan Supabase
               </button>
               <button onclick="resetSupabaseConfig()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer">
-                Putuskan (Mode Demo)
+                Kembali ke Default
               </button>
             </div>
           </div>
@@ -675,12 +675,16 @@
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.customers TO anon, authenticated;
+
 ALTER TABLE public.customers ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Izinkan semua operasi pada tabel customers" ON public.customers;
 CREATE POLICY "Izinkan semua operasi pada tabel customers"
 ON public.customers
 FOR ALL
+TO anon, authenticated
 USING (true)
 WITH CHECK (true);</pre>
         <div class="flex justify-end gap-2">
@@ -699,6 +703,13 @@ WITH CHECK (true);</pre>
        LOGIKA JAVASCRIPT & INTEGRASI SUPABASE
   ========================================================== -->
   <script>
+    // =========================================================
+    // KONFIGURASI DEFAULT SUPABASE (OTOMATIS TERHUBUNG DI HP ANDROID)
+    // Ganti nilai di bawah ini dengan Project URL & Anon Public Key Supabase Anda
+    // =========================================================
+    const DEFAULT_SB_URL = 'https://bcnnrcqtzqkpcbztevam.supabase.co';
+    const DEFAULT_SB_KEY = 'sb_publishable_fc9ikpiOtCDZ3b7DYzWmcg_mJ_Whp2O';
+
     const NAMA_BULAN = [
       'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
       'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
@@ -926,15 +937,22 @@ WITH CHECK (true);</pre>
     }
 
     function initSupabase() {
-      const url = localStorage.getItem('pdam_sb_url') || '';
-      const key = localStorage.getItem('pdam_sb_key') || '';
-      document.getElementById('cfg-sb-url').value = url;
-      document.getElementById('cfg-sb-key').value = key;
+      const url = (localStorage.getItem('pdam_sb_url') || DEFAULT_SB_URL).trim();
+      const key = (localStorage.getItem('pdam_sb_key') || DEFAULT_SB_KEY).trim();
+
+      document.getElementById('cfg-sb-url').value = url.includes('YOUR-PROJECT-ID') ? '' : url;
+      document.getElementById('cfg-sb-key').value = key.includes('YOUR-SUPABASE-ANON-PUBLIC-KEY') ? '' : key;
 
       const badge = document.getElementById('db-status-badge');
       const demoHint = document.getElementById('demo-quick-hint');
 
-      if (url && key && window.supabase) {
+      const isConfigured =
+        url &&
+        key &&
+        !url.includes('YOUR-PROJECT-ID') &&
+        !key.includes('YOUR-SUPABASE-ANON-PUBLIC-KEY');
+
+      if (isConfigured && window.supabase) {
         try {
           supabaseClient = window.supabase.createClient(url, key);
           badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/25 text-emerald-100 font-semibold';
@@ -1141,7 +1159,7 @@ WITH CHECK (true);</pre>
       localStorage.removeItem('pdam_sb_key');
       initSupabase();
       loadCustomers();
-      alert('Koneksi Supabase diputus. Kembali ke Mode Demo Lokal.');
+      alert('Koneksi dikembalikan ke konfigurasi default pada kode.');
     }
 
     function saveAppSettings() {
