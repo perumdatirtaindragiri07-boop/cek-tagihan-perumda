@@ -586,7 +586,7 @@
                 No. PDAM | Nama Pelanggan | Alamat | Tagihan Air (Rp) | Non Air (Rp) | Denda (Rp) | Jumlah (Rp) | Jumlah Rekening
               </code>
               <span class="block mt-1 text-[11px] text-sky-700 font-semibold">
-                Catatan: Semua baris dengan No. PDAM sama (alamat sama maupun berbeda) otomatis digabung menjadi 1 lembar tagihan.
+                Catatan: Baris dengan No. PDAM sama (alamat sama maupun berbeda) otomatis diakumulasikan ke 1 data tanpa error duplikat.
               </span>
             </p>
             <textarea
@@ -663,12 +663,10 @@
         </button>
       </div>
       <div class="p-5 space-y-4">
-        <pre id="sql-code-block" class="bg-slate-900 text-emerald-300 p-4 rounded-xl text-xs overflow-x-auto leading-relaxed font-mono select-all">DROP TABLE IF EXISTS public.customers;
-
-CREATE TABLE public.customers (
+        <pre id="sql-code-block" class="bg-slate-900 text-emerald-300 p-4 rounded-xl text-xs overflow-x-auto leading-relaxed font-mono select-all">CREATE TABLE IF NOT EXISTS public.customers (
   no_pdam TEXT PRIMARY KEY,
   nama_pelanggan TEXT NOT NULL DEFAULT '-',
-  alamat TEXT NOT NULL,
+  alamat TEXT NOT NULL DEFAULT '-',
   tagihan_air BIGINT NOT NULL DEFAULT 0,
   non_air BIGINT NOT NULL DEFAULT 0,
   denda BIGINT NOT NULL DEFAULT 0,
@@ -679,6 +677,7 @@ CREATE TABLE public.customers (
 
 ALTER TABLE public.customers ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Izinkan semua operasi pada tabel customers" ON public.customers;
 CREATE POLICY "Izinkan semua operasi pada tabel customers"
 ON public.customers
 FOR ALL
@@ -719,22 +718,12 @@ WITH CHECK (true);</pre>
       {
         no_pdam: '01002',
         nama_pelanggan: 'AHMAD SYARIFUDDIN',
-        alamat: 'JL. KAYU JATI GG. MELATI NO. 05',
-        tagihan_air: 30000,
+        alamat: 'JL. KAYU JATI GG. MELATI NO. 05 ; JL. M. BOYA NO. 25, TEMBILAHAN',
+        tagihan_air: 60000,
         non_air: 0,
         denda: 0,
-        jumlah: 30000,
-        jumlah_rekening: 2
-      },
-      {
-        no_pdam: '01002',
-        nama_pelanggan: 'AHMAD SYARIFUDDIN',
-        alamat: 'JL. M. BOYA NO. 25, TEMBILAHAN',
-        tagihan_air: 30000,
-        non_air: 0,
-        denda: 0,
-        jumlah: 30000,
-        jumlah_rekening: 2
+        jumlah: 60000,
+        jumlah_rekening: 3
       },
       {
         no_pdam: '01003',
@@ -837,7 +826,7 @@ WITH CHECK (true);</pre>
       };
     }
 
-    // Menggabungkan SEMUA record dengan no_pdam sama (baik alamat sama maupun berbeda) ke 1 lembar tagihan
+    // Menggabungkan & mengakumulasikan SEMUA record dengan no_pdam sama (alamat sama maupun berbeda) ke 1 lembar tagihan
     function mergeRecordsByNoPdam(records) {
       if (!records || records.length === 0) return null;
       if (records.length === 1) {
@@ -854,17 +843,27 @@ WITH CHECK (true);</pre>
       const namaList = [...new Set(
         records.map(r => normalizeTextKey(r.nama_pelanggan)).filter(n => n && n !== '-')
       )];
-      const alamatList = [...new Set(
-        records.map(r => normalizeTextKey(r.alamat)).filter(a => a && a !== '-')
-      )];
+
+      const alamatList = [];
+      records.forEach(r => {
+        const rawAddr = normalizeTextKey(r.alamat);
+        if (!rawAddr || rawAddr === '-') return;
+        rawAddr.split(/\s*;\s*/).forEach(part => {
+          const cleanPart = normalizeTextKey(part);
+          if (cleanPart && !alamatList.includes(cleanPart)) {
+            alamatList.push(cleanPart);
+          }
+        });
+      });
 
       let totalAir = 0;
       let totalNonAir = 0;
       let totalDenda = 0;
       let totalJumlah = 0;
-      let totalLembar = 0;
+      let totalBulanTunggakan = 0;
+      let maxLembar = 0;
 
-      records.forEach((rec, idx) => {
+      records.forEach(rec => {
         const air = parseNominalValue(rec.tagihan_air);
         const nonAir = parseNominalValue(rec.non_air);
         const denda = parseNominalValue(rec.denda);
@@ -877,14 +876,13 @@ WITH CHECK (true);</pre>
         totalDenda += denda;
         totalJumlah += jml;
 
-        if (idx === 0) {
-          totalLembar = lbr;
-        } else if (lbr > 1) {
-          totalLembar = (totalLembar > 1 ? totalLembar : 1) + (lbr - 1);
-        } else if (lbr === 1 && totalLembar === 0) {
-          totalLembar = 1;
+        if (lbr > maxLembar) maxLembar = lbr;
+        if (lbr > 1) {
+          totalBulanTunggakan += (lbr - 1);
         }
       });
+
+      const totalLembar = totalBulanTunggakan > 0 ? (totalBulanTunggakan + 1) : maxLembar;
 
       return {
         no_pdam: normalizeTextKey(first.no_pdam),
@@ -1041,7 +1039,7 @@ WITH CHECK (true);</pre>
 
       const mergedBadge = document.getElementById('bill-merged-badge');
       if (data._mergedCount && data._mergedCount > 1) {
-        mergedBadge.textContent = `Gabungan ${data._mergedCount} data dengan No. PDAM ${data.no_pdam}`;
+        mergedBadge.textContent = `Akumulasi ${data._mergedCount} baris untuk No. PDAM ${data.no_pdam}`;
         mergedBadge.classList.remove('hidden');
       } else {
         mergedBadge.classList.add('hidden');
@@ -1367,7 +1365,7 @@ WITH CHECK (true);</pre>
 
         document.getElementById('bulk-import-text').value = '';
         await loadCustomers();
-        alert(`Berhasil memproses & menggabungkan menjadi ${records.length} data tagihan pelanggan!`);
+        alert(`Berhasil memproses ${lines.length} baris dan mengakumulasikannya menjadi ${records.length} data pelanggan unik (tanpa error duplikat)!`);
       } catch (err) {
         alert('Gagal melakukan import massal: ' + (err.message || err));
       }
