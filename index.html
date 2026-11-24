@@ -39,10 +39,11 @@
         padding: 0 !important;
         margin: 0 !important;
       }
-      #bill-paper {
+      .bill-paper {
         box-shadow: none !important;
         border: 1px solid #cbd5e1 !important;
         max-width: 100% !important;
+        page-break-inside: avoid;
       }
     }
   </style>
@@ -179,112 +180,23 @@
        LAYAR 3: LEMBAR HASIL TAGIHAN PELANGGAN
   ========================================================== -->
   <section id="screen-bill" class="hidden min-h-screen py-6 px-4 sm:py-10 flex flex-col items-center justify-center">
-    <div id="bill-paper" class="w-full max-w-xl bg-white rounded-2xl pdam-card-shadow border border-sky-200 overflow-hidden">
+    <div id="bill-container" class="w-full max-w-xl space-y-6">
+      <!-- Lembar tagihan akan dirender di sini secara dinamis -->
+    </div>
 
-      <!-- KOP SURAT INSTANSI -->
-      <div class="bg-gradient-to-r from-[#004481] via-[#0066b3] to-[#0088cc] p-5 sm:p-6 text-white border-b-4 border-amber-400">
-        <div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
-          <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white p-2 shadow-lg flex-shrink-0 flex items-center justify-center">
-            <img id="bill-logo-img" src="" alt="Logo Instansi" class="hidden w-full h-full object-contain rounded-full" />
-            <svg id="bill-logo-svg" viewBox="0 0 120 120" class="w-12 h-12 sm:w-14 sm:h-14" fill="none">
-              <path d="M60 12C60 12 22 54.5 22 79C22 99.9868 39.0132 114 60 114C80.9868 114 98 99.9868 98 79C98 54.5 60 12 60 12Z" fill="#0066b3"/>
-              <path d="M35 82C43 75 53 75 60 82C67 89 77 89 85 82" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
-              <path d="M40 94C47 89 54 89 60 94C66 99 73 99 80 94" stroke="#bae6fd" stroke-width="4" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <div class="flex-1">
-            <p class="text-[11px] font-bold tracking-widest uppercase text-sky-200">Perusahaan Umum Daerah Air Minum</p>
-            <h1 class="text-xl sm:text-2xl font-extrabold tracking-wide text-white drop-shadow-sm mt-0.5">
-              PERUMDA TIRTA INDRAGIRI
-            </h1>
-            <p class="text-xs text-sky-100 mt-1">Jl. M. Boya No. 07 Tembilahan - Kabupaten Indragiri Hilir</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- JUDUL & TANGGAL UPDATE HARIAN -->
-      <div class="bg-sky-50 px-5 sm:px-7 py-3 border-b border-sky-100 flex flex-wrap items-center justify-between gap-2 text-xs">
-        <span class="font-extrabold text-[#00529b] uppercase tracking-wider">INFORMASI TAGIHAN REKENING AIR</span>
-        <span class="text-slate-600 font-semibold">
-          Tanggal Update: <strong id="bill-tanggal-update" class="text-[#00529b]">-</strong>
-        </span>
-      </div>
-
-      <!-- ISI LEMBAR TAGIHAN -->
-      <div class="p-5 sm:p-7 space-y-5">
-        <!-- Info Penggabungan Jika Ada >1 Record untuk No. PDAM Sama -->
-        <div id="bill-merged-badge" class="hidden px-3.5 py-2 rounded-xl bg-sky-50 border border-sky-200 text-xs font-bold text-[#00529b] text-center"></div>
-
-        <!-- Identitas Pelanggan & Periode -->
-        <div class="grid grid-cols-1 gap-3 bg-slate-50/80 p-4 rounded-xl border border-slate-200/80 text-sm">
-          <div class="flex justify-between items-start gap-4 border-b border-slate-200/70 pb-2.5">
-            <span class="text-slate-500 font-medium">No. PDAM</span>
-            <span id="bill-no-pdam" class="font-extrabold text-slate-900 text-right tracking-wider">-</span>
-          </div>
-          <div class="flex justify-between items-start gap-4 border-b border-slate-200/70 pb-2.5">
-            <span class="text-slate-500 font-medium">Nama Pelanggan</span>
-            <span id="bill-nama-pelanggan" class="font-extrabold text-slate-900 text-right uppercase">-</span>
-          </div>
-          <div class="flex justify-between items-start gap-4 border-b border-slate-200/70 pb-2.5">
-            <span class="text-slate-500 font-medium">Alamat</span>
-            <span id="bill-alamat" class="font-semibold text-slate-800 text-right max-w-xs">-</span>
-          </div>
-          <div class="flex justify-between items-center gap-4 pt-0.5">
-            <span class="text-slate-500 font-medium">Periode Rekening</span>
-            <span id="bill-periode" class="text-right font-bold">-</span>
-          </div>
-        </div>
-
-        <!-- Rincian Tagihan -->
-        <div class="space-y-2.5 text-sm px-1">
-          <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-200">
-            <span class="text-slate-600 font-medium">Tagihan Air (Rp)</span>
-            <span id="bill-tagihan-air" class="font-bold text-slate-800">Rp 0</span>
-          </div>
-          <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-200">
-            <span class="text-slate-600 font-medium">Non Air (Rp)</span>
-            <span id="bill-non-air" class="font-bold text-slate-800">Rp 0</span>
-          </div>
-          <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-200">
-            <span class="text-slate-600 font-medium">Denda (Rp)</span>
-            <span id="bill-denda" class="font-bold text-rose-600">Rp 0</span>
-          </div>
-        </div>
-
-        <!-- Kotak Jumlah Tagihan Menonjol -->
-        <div id="bill-total-box" class="rounded-2xl bg-gradient-to-r from-[#004e92] to-[#0077cc] p-5 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div class="text-center sm:text-left">
-            <p class="text-xs font-bold uppercase tracking-widest text-sky-200">Jumlah (Rp)</p>
-            <p class="text-[11px] text-sky-100 mt-0.5">Total Kewajiban Pembayaran Rekening</p>
-          </div>
-          <div id="bill-jumlah" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-amber-300 drop-shadow">
-            Rp 0
-          </div>
-        </div>
-
-        <!-- Catatan Paling Bawah Sesuai Instruksi -->
-        <div class="p-4 rounded-xl bg-amber-50 border-2 border-amber-300 text-center">
-          <p class="text-xs sm:text-[13px] font-extrabold text-amber-900 leading-relaxed tracking-wide uppercase">
-            "INI HANYA UNTUK MENGETAHUI JUMLAH TAGIHAN, APABILA ANDA TELAH MELAKUKAN PEMBAYARAN MAKA TAGIHAN INI DIABAIKAN SAJA"
-          </p>
-        </div>
-
-        <!-- Tombol Aksi -->
-        <div class="no-print pt-2 flex flex-col sm:flex-row gap-3">
-          <button onclick="backToSearch()" class="flex-1 py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition flex items-center justify-center gap-2 cursor-pointer">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-            </svg>
-            <span>Cek No. PDAM Lain</span>
-          </button>
-          <button onclick="window.print()" class="flex-1 py-3 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm shadow transition flex items-center justify-center gap-2 cursor-pointer">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-            </svg>
-            <span>Cetak / Simpan PDF</span>
-          </button>
-        </div>
-      </div>
+    <div class="no-print w-full max-w-xl pt-4 flex flex-col sm:flex-row gap-3">
+      <button onclick="backToSearch()" class="flex-1 py-3 px-4 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-sm border border-slate-200 shadow-sm transition flex items-center justify-center gap-2 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        <span>Cek No. PDAM Lain</span>
+      </button>
+      <button onclick="window.print()" class="flex-1 py-3 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm shadow transition flex items-center justify-center gap-2 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+        </svg>
+        <span>Cetak / Simpan PDF</span>
+      </button>
     </div>
   </section>
 
@@ -472,7 +384,7 @@
           </form>
         </div>
 
-        <!-- Import Massal dari Excel / CSV (Mendukung Banyak Baris dengan No. PDAM Sama) -->
+        <!-- Import Massal dari Excel / CSV -->
         <div class="lg:col-span-5 bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col justify-between space-y-3">
           <div class="space-y-2">
             <h2 class="font-extrabold text-slate-800 text-sm sm:text-base">
@@ -484,13 +396,13 @@
                 No. PDAM | Nama Pelanggan | Alamat | Tagihan Air (Rp) | Non Air (Rp) | Denda (Rp) | Jumlah (Rp) | Jumlah Rekening
               </code>
               <span class="block mt-1 text-[11px] text-sky-700 font-semibold">
-                Catatan: Jika ada No. PDAM sama pada hasil cek tagihan, nominal &amp; lembar otomatis digabung menjadi 1 lembar tagihan.
+                Catatan: Baris dengan No. PDAM sama dan Alamat sama otomatis digabung menjadi 1 lembar tagihan.
               </span>
             </p>
             <textarea
               id="bulk-import-text"
               rows="6"
-              placeholder="01004	BUDI SANTOSO	JL. SUNGAI BERINGIN NO. 10	30000	-	-	30000	2&#10;01005	SITI AMINAH	JL. PELITA JAYA NO. 22	-	-	-	-	1"
+              placeholder="01004	BUDI SANTOSO	JL. SUNGAI BERINGIN NO. 10	30000	-	-	30000	2&#10;01004	BUDI SANTOSO	JL. SUNGAI BERINGIN NO. 10	30000	-	-	30000	2"
               class="w-full p-3 rounded-xl border border-slate-300 focus:border-sky-600 outline-none text-xs font-mono"
             ></textarea>
           </div>
@@ -639,6 +551,13 @@ WITH CHECK (true);</pre>
     let supabaseClient = null;
     let customersData = [];
 
+    function normalizeTextKey(val) {
+      return String(val || '')
+        .trim()
+        .replace(/\s+/g, ' ')
+        .toUpperCase();
+    }
+
     function parseNominalValue(val) {
       if (val === undefined || val === null) return 0;
       const str = String(val).trim();
@@ -718,16 +637,23 @@ WITH CHECK (true);</pre>
       };
     }
 
-    // Menggabungkan beberapa record yang memiliki no_pdam sama menjadi 1 objek tagihan
-    function mergeRecordsByNoPdam(records) {
+    // Menggabungkan record HANYA jika no_pdam SAMA dan alamat SAMA
+    function mergeSingleSameNoAndAddress(records) {
       if (!records || records.length === 0) return null;
       if (records.length === 1) {
-        return { ...records[0], _mergedCount: 1 };
+        return {
+          ...records[0],
+          no_pdam: normalizeTextKey(records[0].no_pdam),
+          nama_pelanggan: normalizeTextKey(records[0].nama_pelanggan) || '-',
+          alamat: normalizeTextKey(records[0].alamat) || '-',
+          _mergedCount: 1
+        };
       }
 
       const first = records[0];
-      const namaList = [...new Set(records.map(r => (r.nama_pelanggan || '').trim().toUpperCase()).filter(n => n && n !== '-'))];
-      const alamatList = [...new Set(records.map(r => (r.alamat || '').trim().toUpperCase()).filter(a => a && a !== '-'))];
+      const namaList = [...new Set(
+        records.map(r => normalizeTextKey(r.nama_pelanggan)).filter(n => n && n !== '-')
+      )];
 
       let totalAir = 0;
       let totalNonAir = 0;
@@ -748,7 +674,6 @@ WITH CHECK (true);</pre>
         totalDenda += denda;
         totalJumlah += jml;
 
-        // Jika baris ke-2 dst punya lembar >= 2, tambahkan jumlah bulan tunggakannya
         if (idx === 0) {
           totalLembar = lbr;
         } else if (lbr > 1) {
@@ -759,9 +684,9 @@ WITH CHECK (true);</pre>
       });
 
       return {
-        no_pdam: String(first.no_pdam).toUpperCase(),
+        no_pdam: normalizeTextKey(first.no_pdam),
         nama_pelanggan: namaList.length > 0 ? namaList.join(' / ') : '-',
-        alamat: alamatList.length > 0 ? alamatList.join(' | ') : '-',
+        alamat: normalizeTextKey(first.alamat) || '-',
         tagihan_air: totalAir,
         non_air: totalNonAir,
         denda: totalDenda,
@@ -771,10 +696,26 @@ WITH CHECK (true);</pre>
       };
     }
 
+    // Mengelompokkan baris berdasarkan kombinasi (no_pdam + alamat) yang sama
+    function groupByNoPdamAndAddress(records) {
+      const groupMap = new Map();
+      records.forEach(rec => {
+        const keyNo = normalizeTextKey(rec.no_pdam);
+        const keyAddr = normalizeTextKey(rec.alamat);
+        const compositeKey = `${keyNo}||${keyAddr}`;
+        if (!groupMap.has(compositeKey)) {
+          groupMap.set(compositeKey, []);
+        }
+        groupMap.get(compositeKey).push(rec);
+      });
+
+      return Array.from(groupMap.values()).map(list => mergeSingleSameNoAndAddress(list));
+    }
+
     function applyBranding() {
       const logoUrl = localStorage.getItem('pdam_logo_url') || '';
-      const imgIds = ['splash-logo-img', 'search-logo-img', 'bill-logo-img'];
-      const svgIds = ['splash-logo-svg', 'search-logo-svg', 'bill-logo-svg'];
+      const imgIds = ['splash-logo-img', 'search-logo-img'];
+      const svgIds = ['splash-logo-svg', 'search-logo-svg'];
 
       imgIds.forEach((id, idx) => {
         const imgEl = document.getElementById(id);
@@ -790,8 +731,6 @@ WITH CHECK (true);</pre>
       });
 
       const dateObj = getUpdateDateObj();
-      document.getElementById('bill-tanggal-update').textContent = formatTanggalIndonesia(dateObj);
-
       const yyyy = dateObj.getFullYear();
       const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
       const dd = String(dateObj.getDate()).padStart(2, '0');
@@ -852,10 +791,9 @@ WITH CHECK (true);</pre>
       handleSearchBill(new Event('submit'));
     }
 
-    // Pencarian Tagihan Berdasarkan No. PDAM (Menggabungkan jika ada >1 baris dengan no_pdam sama)
     async function handleSearchBill(e) {
       e.preventDefault();
-      const inputVal = document.getElementById('input-no-pdam').value.trim().toUpperCase();
+      const inputVal = normalizeTextKey(document.getElementById('input-no-pdam').value);
       const errBox = document.getElementById('search-error');
       const btn = document.getElementById('btn-cek-tagihan');
 
@@ -877,7 +815,7 @@ WITH CHECK (true);</pre>
           matchedRows = data || [];
         } else {
           await loadLocalCustomers();
-          matchedRows = customersData.filter(c => String(c.no_pdam).toUpperCase() === inputVal);
+          matchedRows = customersData.filter(c => normalizeTextKey(c.no_pdam) === inputVal);
         }
 
         if (!matchedRows || matchedRows.length === 0) {
@@ -886,8 +824,8 @@ WITH CHECK (true);</pre>
           return;
         }
 
-        const mergedRecord = mergeRecordsByNoPdam(matchedRows);
-        renderBillSheet(mergedRecord);
+        const mergedSheets = groupByNoPdamAndAddress(matchedRows);
+        renderBillSheets(mergedSheets);
       } catch (err) {
         errBox.textContent = 'Terjadi gangguan koneksi database: ' + (err.message || err);
         errBox.classList.remove('hidden');
@@ -902,40 +840,128 @@ WITH CHECK (true);</pre>
       }
     }
 
-    function renderBillSheet(data) {
-      const periodeInfo = formatPeriodeRekening(data.jumlah_rekening);
-      const isLunas = periodeInfo.isLunas;
-
-      const tagihanAir = isLunas ? 0 : parseNominalValue(data.tagihan_air);
-      const nonAir = isLunas ? 0 : parseNominalValue(data.non_air);
-      const denda = isLunas ? 0 : parseNominalValue(data.denda);
-      const rawJumlah = parseNominalValue(data.jumlah);
-      const jumlah = isLunas ? 0 : (rawJumlah || (tagihanAir + nonAir + denda));
-
-      const mergedBadge = document.getElementById('bill-merged-badge');
-      if (data._mergedCount && data._mergedCount > 1) {
-        mergedBadge.textContent = `Gabungan ${data._mergedCount} baris data dengan No. PDAM ${data.no_pdam} dalam 1 lembar tagihan`;
-        mergedBadge.classList.remove('hidden');
-      } else {
-        mergedBadge.classList.add('hidden');
+    function buildLogoKopHtml() {
+      const logoUrl = (localStorage.getItem('pdam_logo_url') || '').trim();
+      if (logoUrl) {
+        return `<img src="${logoUrl}" alt="Logo Instansi" class="w-full h-full object-contain rounded-full" />`;
       }
+      return `
+        <svg viewBox="0 0 120 120" class="w-12 h-12 sm:w-14 sm:h-14" fill="none">
+          <path d="M60 12C60 12 22 54.5 22 79C22 99.9868 39.0132 114 60 114C80.9868 114 98 99.9868 98 79C98 54.5 60 12 60 12Z" fill="#0066b3"/>
+          <path d="M35 82C43 75 53 75 60 82C67 89 77 89 85 82" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+          <path d="M40 94C47 89 54 89 60 94C66 99 73 99 80 94" stroke="#bae6fd" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      `;
+    }
 
-      document.getElementById('bill-tanggal-update').textContent = formatTanggalIndonesia(getUpdateDateObj());
-      document.getElementById('bill-no-pdam').textContent = data.no_pdam;
-      document.getElementById('bill-nama-pelanggan').textContent = data.nama_pelanggan || '-';
-      document.getElementById('bill-alamat').textContent = data.alamat || '-';
+    function renderBillSheets(sheets) {
+      const container = document.getElementById('bill-container');
+      const tglUpdateStr = formatTanggalIndonesia(getUpdateDateObj());
+      const logoHtml = buildLogoKopHtml();
 
-      const periodeEl = document.getElementById('bill-periode');
-      if (isLunas) {
-        periodeEl.innerHTML = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold">✓ ${periodeInfo.text}</span>`;
-      } else {
-        periodeEl.innerHTML = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-xs font-extrabold">${periodeInfo.text}</span>`;
-      }
+      container.innerHTML = sheets.map(data => {
+        const periodeInfo = formatPeriodeRekening(data.jumlah_rekening);
+        const isLunas = periodeInfo.isLunas;
 
-      document.getElementById('bill-tagihan-air').textContent = formatRupiah(tagihanAir);
-      document.getElementById('bill-non-air').textContent = formatRupiah(nonAir);
-      document.getElementById('bill-denda').textContent = formatRupiah(denda);
-      document.getElementById('bill-jumlah').textContent = formatRupiah(jumlah);
+        const tagihanAir = isLunas ? 0 : parseNominalValue(data.tagihan_air);
+        const nonAir = isLunas ? 0 : parseNominalValue(data.non_air);
+        const denda = isLunas ? 0 : parseNominalValue(data.denda);
+        const rawJumlah = parseNominalValue(data.jumlah);
+        const jumlah = isLunas ? 0 : (rawJumlah || (tagihanAir + nonAir + denda));
+
+        const mergedNotice = (data._mergedCount && data._mergedCount > 1)
+          ? `<div class="px-3.5 py-2 rounded-xl bg-sky-50 border border-sky-200 text-xs font-bold text-[#00529b] text-center">
+               Gabungan ${data._mergedCount} data dengan No. PDAM &amp; Alamat yang sama dalam 1 lembar tagihan
+             </div>`
+          : '';
+
+        const periodeBadge = isLunas
+          ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold">✓ ${periodeInfo.text}</span>`
+          : `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-xs font-extrabold">${periodeInfo.text}</span>`;
+
+        return `
+          <div class="bill-paper w-full bg-white rounded-2xl pdam-card-shadow border border-sky-200 overflow-hidden">
+            <!-- KOP SURAT INSTANSI -->
+            <div class="bg-gradient-to-r from-[#004481] via-[#0066b3] to-[#0088cc] p-5 sm:p-6 text-white border-b-4 border-amber-400">
+              <div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white p-2 shadow-lg flex-shrink-0 flex items-center justify-center">
+                  ${logoHtml}
+                </div>
+                <div class="flex-1">
+                  <p class="text-[11px] font-bold tracking-widest uppercase text-sky-200">Perusahaan Umum Daerah Air Minum</p>
+                  <h1 class="text-xl sm:text-2xl font-extrabold tracking-wide text-white drop-shadow-sm mt-0.5">
+                    PERUMDA TIRTA INDRAGIRI
+                  </h1>
+                  <p class="text-xs text-sky-100 mt-1">Jl. M. Boya No. 07 Tembilahan - Kabupaten Indragiri Hilir</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- JUDUL & TANGGAL UPDATE HARIAN -->
+            <div class="bg-sky-50 px-5 sm:px-7 py-3 border-b border-sky-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <span class="font-extrabold text-[#00529b] uppercase tracking-wider">INFORMASI TAGIHAN REKENING AIR</span>
+              <span class="text-slate-600 font-semibold">
+                Tanggal Update: <strong class="text-[#00529b]">${tglUpdateStr}</strong>
+              </span>
+            </div>
+
+            <!-- ISI LEMBAR TAGIHAN -->
+            <div class="p-5 sm:p-7 space-y-5">
+              ${mergedNotice}
+
+              <div class="grid grid-cols-1 gap-3 bg-slate-50/80 p-4 rounded-xl border border-slate-200/80 text-sm">
+                <div class="flex justify-between items-start gap-4 border-b border-slate-200/70 pb-2.5">
+                  <span class="text-slate-500 font-medium">No. PDAM</span>
+                  <span class="font-extrabold text-slate-900 text-right tracking-wider">${data.no_pdam}</span>
+                </div>
+                <div class="flex justify-between items-start gap-4 border-b border-slate-200/70 pb-2.5">
+                  <span class="text-slate-500 font-medium">Nama Pelanggan</span>
+                  <span class="font-extrabold text-slate-900 text-right uppercase">${data.nama_pelanggan || '-'}</span>
+                </div>
+                <div class="flex justify-between items-start gap-4 border-b border-slate-200/70 pb-2.5">
+                  <span class="text-slate-500 font-medium">Alamat</span>
+                  <span class="font-semibold text-slate-800 text-right max-w-xs">${data.alamat || '-'}</span>
+                </div>
+                <div class="flex justify-between items-center gap-4 pt-0.5">
+                  <span class="text-slate-500 font-medium">Periode Rekening</span>
+                  <span class="text-right font-bold">${periodeBadge}</span>
+                </div>
+              </div>
+
+              <div class="space-y-2.5 text-sm px-1">
+                <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-200">
+                  <span class="text-slate-600 font-medium">Tagihan Air (Rp)</span>
+                  <span class="font-bold text-slate-800">${formatRupiah(tagihanAir)}</span>
+                </div>
+                <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-200">
+                  <span class="text-slate-600 font-medium">Non Air (Rp)</span>
+                  <span class="font-bold text-slate-800">${formatRupiah(nonAir)}</span>
+                </div>
+                <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-200">
+                  <span class="text-slate-600 font-medium">Denda (Rp)</span>
+                  <span class="font-bold text-rose-600">${formatRupiah(denda)}</span>
+                </div>
+              </div>
+
+              <div class="rounded-2xl bg-gradient-to-r from-[#004e92] to-[#0077cc] p-5 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-2">
+                <div class="text-center sm:text-left">
+                  <p class="text-xs font-bold uppercase tracking-widest text-sky-200">Jumlah (Rp)</p>
+                  <p class="text-[11px] text-sky-100 mt-0.5">Total Kewajiban Pembayaran Rekening</p>
+                </div>
+                <div class="text-2xl sm:text-3xl font-extrabold tracking-tight text-amber-300 drop-shadow">
+                  ${formatRupiah(jumlah)}
+                </div>
+              </div>
+
+              <div class="p-4 rounded-xl bg-amber-50 border-2 border-amber-300 text-center">
+                <p class="text-xs sm:text-[13px] font-extrabold text-amber-900 leading-relaxed tracking-wide uppercase">
+                  "INI HANYA UNTUK MENGETAHUI JUMLAH TAGIHAN, APABILA ANDA TELAH MELAKUKAN PEMBAYARAN MAKA TAGIHAN INI DIABAIKAN SAJA"
+                </p>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
 
       hideAllScreens();
       document.getElementById('screen-bill').classList.remove('hidden');
@@ -1059,8 +1085,11 @@ WITH CHECK (true);</pre>
       updateAdminFormPreview();
     }
 
-    function editCustomer(noPdam) {
-      const item = customersData.find(c => c.no_pdam === noPdam);
+    function editCustomer(noPdam, alamatKey) {
+      const item = customersData.find(c =>
+        normalizeTextKey(c.no_pdam) === normalizeTextKey(noPdam) &&
+        (!alamatKey || normalizeTextKey(c.alamat) === normalizeTextKey(alamatKey))
+      );
       if (!item) return;
       document.getElementById('form-title').textContent = `Edit Data Tagihan — No. PDAM ${item.no_pdam}`;
       document.getElementById('f-no-pdam').value = item.no_pdam;
@@ -1106,9 +1135,9 @@ WITH CHECK (true);</pre>
     async function handleSaveCustomer(e) {
       e.preventDefault();
       const payload = {
-        no_pdam: document.getElementById('f-no-pdam').value.trim().toUpperCase(),
-        nama_pelanggan: document.getElementById('f-nama-pelanggan').value.trim().toUpperCase(),
-        alamat: document.getElementById('f-alamat').value.trim().toUpperCase(),
+        no_pdam: normalizeTextKey(document.getElementById('f-no-pdam').value),
+        nama_pelanggan: normalizeTextKey(document.getElementById('f-nama-pelanggan').value),
+        alamat: normalizeTextKey(document.getElementById('f-alamat').value),
         tagihan_air: parseNominalValue(document.getElementById('f-tagihan-air').value),
         non_air: parseNominalValue(document.getElementById('f-non-air').value),
         denda: parseNominalValue(document.getElementById('f-denda').value),
@@ -1123,7 +1152,7 @@ WITH CHECK (true);</pre>
             .upsert(payload, { onConflict: 'no_pdam' });
           if (error) throw error;
         } else {
-          const idx = customersData.findIndex(c => c.no_pdam === payload.no_pdam);
+          const idx = customersData.findIndex(c => normalizeTextKey(c.no_pdam) === payload.no_pdam);
           if (idx >= 0) customersData[idx] = payload;
           else customersData.push(payload);
           localStorage.setItem('pdam_demo_customers', JSON.stringify(customersData));
@@ -1146,7 +1175,7 @@ WITH CHECK (true);</pre>
             .eq('no_pdam', noPdam);
           if (error) throw error;
         } else {
-          customersData = customersData.filter(c => c.no_pdam !== noPdam);
+          customersData = customersData.filter(c => normalizeTextKey(c.no_pdam) !== normalizeTextKey(noPdam));
           localStorage.setItem('pdam_demo_customers', JSON.stringify(customersData));
         }
         await loadCustomers();
@@ -1155,6 +1184,7 @@ WITH CHECK (true);</pre>
       }
     }
 
+    // Import Massal 8 Kolom: Menggabungkan baris yang memiliki no_pdam SAMA dan alamat SAMA
     async function handleBulkImport() {
       const rawText = document.getElementById('bulk-import-text').value.trim();
       if (!rawText) {
@@ -1163,19 +1193,19 @@ WITH CHECK (true);</pre>
       }
 
       const lines = rawText.split(/\r?\n/).filter(line => line.trim() !== '');
-      const groupedMap = new Map();
+      const parsedRows = [];
 
       lines.forEach(line => {
         const delimiter = line.includes('\t') ? '\t' : (line.includes(';') ? ';' : ',');
         const cols = line.split(delimiter).map(c => c.trim());
         if (cols.length < 3) return;
 
-        const firstCol = cols[0].toUpperCase();
+        const firstCol = normalizeTextKey(cols[0]);
         if (firstCol === 'NO. PDAM' || firstCol === 'NO PDAM' || firstCol === 'NO_PDAM') return;
 
         const no_pdam = firstCol;
-        const nama_pelanggan = (cols[1] || '-').toUpperCase();
-        const alamat = (cols[2] || '-').toUpperCase();
+        const nama_pelanggan = normalizeTextKey(cols[1]) || '-';
+        const alamat = normalizeTextKey(cols[2]) || '-';
         const tagihan_air = parseNominalValue(cols[3]);
         const non_air = parseNominalValue(cols[4]);
         const denda = parseNominalValue(cols[5]);
@@ -1186,7 +1216,7 @@ WITH CHECK (true);</pre>
           ? parseInt(parseNominalValue(cols[7]), 10)
           : 1;
 
-        const rowObj = {
+        parsedRows.push({
           no_pdam,
           nama_pelanggan,
           alamat,
@@ -1195,28 +1225,20 @@ WITH CHECK (true);</pre>
           denda,
           jumlah,
           jumlah_rekening
-        };
-
-        if (!groupedMap.has(no_pdam)) {
-          groupedMap.set(no_pdam, [rowObj]);
-        } else {
-          groupedMap.get(no_pdam).push(rowObj);
-        }
+        });
       });
 
-      const records = Array.from(groupedMap.values()).map(list => {
-        const merged = mergeRecordsByNoPdam(list);
-        return {
-          no_pdam: merged.no_pdam,
-          nama_pelanggan: merged.nama_pelanggan,
-          alamat: merged.alamat,
-          tagihan_air: merged.tagihan_air,
-          non_air: merged.non_air,
-          denda: merged.denda,
-          jumlah: merged.jumlah,
-          jumlah_rekening: merged.jumlah_rekening
-        };
-      });
+      const mergedByNoAndAddr = groupByNoPdamAndAddress(parsedRows);
+      const records = mergedByNoAndAddr.map(m => ({
+        no_pdam: m.no_pdam,
+        nama_pelanggan: m.nama_pelanggan,
+        alamat: m.alamat,
+        tagihan_air: m.tagihan_air,
+        non_air: m.non_air,
+        denda: m.denda,
+        jumlah: m.jumlah,
+        jumlah_rekening: m.jumlah_rekening
+      }));
 
       if (records.length === 0) {
         alert('Format data tidak valid. Pastikan urutan 8 kolom sesuai panduan.');
@@ -1231,7 +1253,7 @@ WITH CHECK (true);</pre>
           if (error) throw error;
         } else {
           records.forEach(rec => {
-            const idx = customersData.findIndex(c => c.no_pdam === rec.no_pdam);
+            const idx = customersData.findIndex(c => normalizeTextKey(c.no_pdam) === rec.no_pdam);
             if (idx >= 0) customersData[idx] = rec;
             else customersData.push(rec);
           });
@@ -1240,7 +1262,7 @@ WITH CHECK (true);</pre>
 
         document.getElementById('bulk-import-text').value = '';
         await loadCustomers();
-        alert(`Berhasil memproses & menggabungkan menjadi ${records.length} data tagihan pelanggan!`);
+        alert(`Berhasil memproses ${parsedRows.length} baris menjadi ${records.length} data pelanggan (digabung jika No. PDAM & Alamat sama)!`);
       } catch (err) {
         alert('Gagal melakukan import massal: ' + (err.message || err));
       }
@@ -1248,12 +1270,12 @@ WITH CHECK (true);</pre>
 
     function renderAdminTable() {
       const tbody = document.getElementById('admin-table-body');
-      const keyword = (document.getElementById('admin-filter-input').value || '').trim().toUpperCase();
+      const keyword = normalizeTextKey(document.getElementById('admin-filter-input').value);
 
       const filtered = customersData.filter(c =>
-        String(c.no_pdam).toUpperCase().includes(keyword) ||
-        String(c.nama_pelanggan || '').toUpperCase().includes(keyword) ||
-        String(c.alamat).toUpperCase().includes(keyword)
+        normalizeTextKey(c.no_pdam).includes(keyword) ||
+        normalizeTextKey(c.nama_pelanggan).includes(keyword) ||
+        normalizeTextKey(c.alamat).includes(keyword)
       );
 
       document.getElementById('total-records-count').textContent = filtered.length;
