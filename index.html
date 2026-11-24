@@ -447,19 +447,19 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div>
                 <label class="block font-bold text-slate-700 mb-1">Tagihan Air (Rp)</label>
-                <input type="number" id="f-tagihan-air" min="0" value="0" oninput="autoCalcJumlah()" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-sky-600 outline-none" />
+                <input type="text" id="f-tagihan-air" value="0" oninput="autoCalcJumlah()" onblur="formatNominalInput(this)" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-sky-600 outline-none" />
               </div>
               <div>
                 <label class="block font-bold text-slate-700 mb-1">Non Air (Rp)</label>
-                <input type="number" id="f-non-air" min="0" value="0" oninput="autoCalcJumlah()" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-sky-600 outline-none" />
+                <input type="text" id="f-non-air" value="0" oninput="autoCalcJumlah()" onblur="formatNominalInput(this)" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-sky-600 outline-none" />
               </div>
               <div>
                 <label class="block font-bold text-slate-700 mb-1">Denda (Rp)</label>
-                <input type="number" id="f-denda" min="0" value="0" oninput="autoCalcJumlah()" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-sky-600 outline-none" />
+                <input type="text" id="f-denda" value="0" oninput="autoCalcJumlah()" onblur="formatNominalInput(this)" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-sky-600 outline-none" />
               </div>
               <div>
                 <label class="block font-bold text-sky-800 mb-1">Jumlah (Rp)</label>
-                <input type="number" id="f-jumlah" min="0" value="0" class="w-full px-3 py-2 rounded-xl border-2 border-sky-300 bg-sky-50 font-extrabold text-sky-900 outline-none" />
+                <input type="text" id="f-jumlah" value="0" onblur="formatNominalInput(this)" class="w-full px-3 py-2 rounded-xl border-2 border-sky-300 bg-sky-50 font-extrabold text-sky-900 outline-none" />
               </div>
             </div>
 
@@ -489,7 +489,7 @@
             <textarea
               id="bulk-import-text"
               rows="6"
-              placeholder="01004	BUDI SANTOSO	JL. SUNGAI BERINGIN NO. 10	120000	0	5000	125000	2&#10;01005	SITI AMINAH	JL. PELITA JAYA NO. 22	0	0	0	0	1"
+              placeholder="01004	BUDI SANTOSO	JL. SUNGAI BERINGIN NO. 10	120000	-	5000	125000	2&#10;01005	SITI AMINAH	JL. PELITA JAYA NO. 22	-	-	-	-	1"
               class="w-full p-3 rounded-xl border border-slate-300 focus:border-sky-600 outline-none text-xs font-mono"
             ></textarea>
           </div>
@@ -641,10 +641,29 @@ WITH CHECK (true);</pre>
     let supabaseClient = null;
     let customersData = [];
 
-    // Format Rupiah
+    // Parsing nilai nominal: jika "-" atau kosong/bukan angka maka 0
+    function parseNominalValue(val) {
+      if (val === undefined || val === null) return 0;
+      const str = String(val).trim();
+      if (str === '' || str === '-') return 0;
+      const cleaned = str.replace(/[^0-9-]/g, '');
+      const parsed = Number(cleaned);
+      return Number.isNaN(parsed) ? 0 : parsed;
+    }
+
+    // Format angka dengan pemisah koma ribuan (misal 30000 -> "30,000"; "-" -> "0")
+    function formatAngkaKoma(angka) {
+      const num = parseNominalValue(angka);
+      return num.toLocaleString('en-US');
+    }
+
+    // Format Rupiah dengan pemisah koma ribuan (misal 30000 -> "Rp 30,000"; "-" -> "Rp 0")
     function formatRupiah(angka) {
-      const num = Number(angka) || 0;
-      return 'Rp ' + num.toLocaleString('id-ID');
+      return 'Rp ' + formatAngkaKoma(angka);
+    }
+
+    function formatNominalInput(inputEl) {
+      inputEl.value = formatAngkaKoma(inputEl.value);
     }
 
     // Ambil Tanggal Update Harian (default: hari ini)
@@ -844,10 +863,11 @@ WITH CHECK (true);</pre>
       const periodeInfo = formatPeriodeRekening(data.jumlah_rekening);
       const isLunas = periodeInfo.isLunas;
 
-      const tagihanAir = isLunas ? 0 : (Number(data.tagihan_air) || 0);
-      const nonAir = isLunas ? 0 : (Number(data.non_air) || 0);
-      const denda = isLunas ? 0 : (Number(data.denda) || 0);
-      const jumlah = isLunas ? 0 : (Number(data.jumlah) || (tagihanAir + nonAir + denda));
+      const tagihanAir = isLunas ? 0 : parseNominalValue(data.tagihan_air);
+      const nonAir = isLunas ? 0 : parseNominalValue(data.non_air);
+      const denda = isLunas ? 0 : parseNominalValue(data.denda);
+      const rawJumlah = parseNominalValue(data.jumlah);
+      const jumlah = isLunas ? 0 : (rawJumlah || (tagihanAir + nonAir + denda));
 
       document.getElementById('bill-tanggal-update').textContent = formatTanggalIndonesia(getUpdateDateObj());
       document.getElementById('bill-no-pdam').textContent = data.no_pdam;
@@ -968,10 +988,10 @@ WITH CHECK (true);</pre>
     }
 
     function autoCalcJumlah() {
-      const air = Number(document.getElementById('f-tagihan-air').value) || 0;
-      const nonAir = Number(document.getElementById('f-non-air').value) || 0;
-      const denda = Number(document.getElementById('f-denda').value) || 0;
-      document.getElementById('f-jumlah').value = air + nonAir + denda;
+      const air = parseNominalValue(document.getElementById('f-tagihan-air').value);
+      const nonAir = parseNominalValue(document.getElementById('f-non-air').value);
+      const denda = parseNominalValue(document.getElementById('f-denda').value);
+      document.getElementById('f-jumlah').value = formatAngkaKoma(air + nonAir + denda);
     }
 
     function resetCustomerForm() {
@@ -980,10 +1000,10 @@ WITH CHECK (true);</pre>
       document.getElementById('f-no-pdam').readOnly = false;
       document.getElementById('f-nama-pelanggan').value = '';
       document.getElementById('f-alamat').value = '';
-      document.getElementById('f-tagihan-air').value = 0;
-      document.getElementById('f-non-air').value = 0;
-      document.getElementById('f-denda').value = 0;
-      document.getElementById('f-jumlah').value = 0;
+      document.getElementById('f-tagihan-air').value = '0';
+      document.getElementById('f-non-air').value = '0';
+      document.getElementById('f-denda').value = '0';
+      document.getElementById('f-jumlah').value = '0';
       document.getElementById('f-jumlah-rekening').value = 1;
       updateAdminFormPreview();
     }
@@ -995,10 +1015,10 @@ WITH CHECK (true);</pre>
       document.getElementById('f-no-pdam').value = item.no_pdam;
       document.getElementById('f-nama-pelanggan').value = item.nama_pelanggan || '';
       document.getElementById('f-alamat').value = item.alamat;
-      document.getElementById('f-tagihan-air').value = item.tagihan_air;
-      document.getElementById('f-non-air').value = item.non_air;
-      document.getElementById('f-denda').value = item.denda;
-      document.getElementById('f-jumlah').value = item.jumlah;
+      document.getElementById('f-tagihan-air').value = formatAngkaKoma(item.tagihan_air);
+      document.getElementById('f-non-air').value = formatAngkaKoma(item.non_air);
+      document.getElementById('f-denda').value = formatAngkaKoma(item.denda);
+      document.getElementById('f-jumlah').value = formatAngkaKoma(item.jumlah);
       document.getElementById('f-jumlah-rekening').value = item.jumlah_rekening;
       updateAdminFormPreview();
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1038,10 +1058,10 @@ WITH CHECK (true);</pre>
         no_pdam: document.getElementById('f-no-pdam').value.trim().toUpperCase(),
         nama_pelanggan: document.getElementById('f-nama-pelanggan').value.trim().toUpperCase(),
         alamat: document.getElementById('f-alamat').value.trim().toUpperCase(),
-        tagihan_air: Number(document.getElementById('f-tagihan-air').value) || 0,
-        non_air: Number(document.getElementById('f-non-air').value) || 0,
-        denda: Number(document.getElementById('f-denda').value) || 0,
-        jumlah: Number(document.getElementById('f-jumlah').value) || 0,
+        tagihan_air: parseNominalValue(document.getElementById('f-tagihan-air').value),
+        non_air: parseNominalValue(document.getElementById('f-non-air').value),
+        denda: parseNominalValue(document.getElementById('f-denda').value),
+        jumlah: parseNominalValue(document.getElementById('f-jumlah').value),
         jumlah_rekening: parseInt(document.getElementById('f-jumlah-rekening').value, 10) || 0
       };
 
@@ -1084,13 +1104,6 @@ WITH CHECK (true);</pre>
       }
     }
 
-    // Parse Angka Rupiah Bersih dari Excel/CSV
-    function parseCleanNumber(val) {
-      if (val === undefined || val === null) return 0;
-      const cleaned = String(val).replace(/[^0-9-]/g, '');
-      return Number(cleaned) || 0;
-    }
-
     // Import Massal 8 Kolom (Tab / Titik Koma / Koma)
     async function handleBulkImport() {
       const rawText = document.getElementById('bulk-import-text').value.trim();
@@ -1114,14 +1127,14 @@ WITH CHECK (true);</pre>
         const no_pdam = firstCol;
         const nama_pelanggan = (cols[1] || '-').toUpperCase();
         const alamat = (cols[2] || '-').toUpperCase();
-        const tagihan_air = parseCleanNumber(cols[3]);
-        const non_air = parseCleanNumber(cols[4]);
-        const denda = parseCleanNumber(cols[5]);
-        const jumlah = cols[6] !== undefined && cols[6] !== ''
-          ? parseCleanNumber(cols[6])
+        const tagihan_air = parseNominalValue(cols[3]);
+        const non_air = parseNominalValue(cols[4]);
+        const denda = parseNominalValue(cols[5]);
+        const jumlah = cols[6] !== undefined && cols[6].trim() !== ''
+          ? parseNominalValue(cols[6])
           : (tagihan_air + non_air + denda);
-        const jumlah_rekening = cols[7] !== undefined && cols[7] !== ''
-          ? parseInt(parseCleanNumber(cols[7]), 10)
+        const jumlah_rekening = cols[7] !== undefined && cols[7].trim() !== ''
+          ? parseInt(parseNominalValue(cols[7]), 10)
           : 1;
 
         recordsMap.set(no_pdam, {
@@ -1200,10 +1213,10 @@ WITH CHECK (true);</pre>
             <td class="py-3 px-4 font-extrabold text-slate-900">${c.no_pdam}</td>
             <td class="py-3 px-4 font-bold text-slate-800 uppercase">${c.nama_pelanggan || '-'}</td>
             <td class="py-3 px-4 text-slate-700">${c.alamat}</td>
-            <td class="py-3 px-4 text-right font-semibold">${formatRupiah(c.tagihan_air)}</td>
-            <td class="py-3 px-4 text-right font-semibold">${formatRupiah(c.non_air)}</td>
-            <td class="py-3 px-4 text-right font-semibold text-rose-600">${formatRupiah(c.denda)}</td>
-            <td class="py-3 px-4 text-right font-extrabold text-[#00529b]">${formatRupiah(c.jumlah)}</td>
+            <td class="py-3 px-4 text-right font-semibold">${formatAngkaKoma(c.tagihan_air)}</td>
+            <td class="py-3 px-4 text-right font-semibold">${formatAngkaKoma(c.non_air)}</td>
+            <td class="py-3 px-4 text-right font-semibold text-rose-600">${formatAngkaKoma(c.denda)}</td>
+            <td class="py-3 px-4 text-right font-extrabold text-[#00529b]">${formatAngkaKoma(c.jumlah)}</td>
             <td class="py-3 px-4">
               <span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-bold ${badgeClass}">
                 ${periode.text}
