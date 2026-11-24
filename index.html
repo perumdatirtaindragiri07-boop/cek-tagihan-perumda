@@ -212,6 +212,9 @@
 
       <!-- ISI LEMBAR TAGIHAN -->
       <div class="p-5 sm:p-7 space-y-5">
+        <!-- Info Penggabungan Jika Ada >1 Record untuk No. PDAM Sama -->
+        <div id="bill-merged-badge" class="hidden px-3.5 py-2 rounded-xl bg-sky-50 border border-sky-200 text-xs font-bold text-[#00529b] text-center"></div>
+
         <!-- Identitas Pelanggan & Periode -->
         <div class="grid grid-cols-1 gap-3 bg-slate-50/80 p-4 rounded-xl border border-slate-200/80 text-sm">
           <div class="flex justify-between items-start gap-4 border-b border-slate-200/70 pb-2.5">
@@ -323,7 +326,6 @@
        LAYAR 4: PANEL KHUSUS ADMIN (HANYA BISA DILIHAT ADMIN)
   ========================================================== -->
   <section id="screen-admin" class="hidden min-h-screen bg-slate-100 pb-12">
-    <!-- Header Admin -->
     <header class="pdam-gradient text-white shadow-md sticky top-0 z-30">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-3">
@@ -354,7 +356,6 @@
 
       <!-- Baris 1: Pengaturan Supabase & Pengaturan Harian/Logo -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Konfigurasi Supabase -->
         <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-4">
           <div class="flex items-center justify-between">
             <h2 class="font-extrabold text-slate-800 text-sm sm:text-base flex items-center gap-2">
@@ -383,7 +384,6 @@
           </div>
         </div>
 
-        <!-- Pengaturan Tanggal Update Harian & Logo Instansi -->
         <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-4">
           <h2 class="font-extrabold text-slate-800 text-sm sm:text-base flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
@@ -410,7 +410,6 @@
 
       <!-- Baris 2: Form Tambah/Edit Data Tagihan & Import Massal Excel/CSV -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <!-- Form Input Satuan (8 Kolom Supabase) -->
         <div class="lg:col-span-7 bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200">
           <h2 id="form-title" class="font-extrabold text-slate-800 text-sm sm:text-base mb-4">
             Tambah / Update Data Tagihan Pelanggan
@@ -438,7 +437,6 @@
               </div>
             </div>
 
-            <!-- Pratinjau Logika Periode Rekening -->
             <div class="p-3 rounded-xl bg-sky-50 border border-sky-200 flex flex-wrap items-center justify-between gap-2 text-xs">
               <span class="font-semibold text-slate-600">Pratinjau Periode Rekening:</span>
               <span id="f-periode-preview" class="font-extrabold text-[#00529b]">LUNAS (1 Lembar)</span>
@@ -474,7 +472,7 @@
           </form>
         </div>
 
-        <!-- Import Massal dari Excel / CSV -->
+        <!-- Import Massal dari Excel / CSV (Mendukung Banyak Baris dengan No. PDAM Sama) -->
         <div class="lg:col-span-5 bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col justify-between space-y-3">
           <div class="space-y-2">
             <h2 class="font-extrabold text-slate-800 text-sm sm:text-base">
@@ -485,11 +483,14 @@
               <code class="text-[11px] bg-slate-100 px-1.5 py-0.5 rounded font-bold text-slate-700 block mt-1">
                 No. PDAM | Nama Pelanggan | Alamat | Tagihan Air (Rp) | Non Air (Rp) | Denda (Rp) | Jumlah (Rp) | Jumlah Rekening
               </code>
+              <span class="block mt-1 text-[11px] text-sky-700 font-semibold">
+                Catatan: Jika ada No. PDAM sama pada hasil cek tagihan, nominal &amp; lembar otomatis digabung menjadi 1 lembar tagihan.
+              </span>
             </p>
             <textarea
               id="bulk-import-text"
               rows="6"
-              placeholder="01004	BUDI SANTOSO	JL. SUNGAI BERINGIN NO. 10	120000	-	5000	125000	2&#10;01005	SITI AMINAH	JL. PELITA JAYA NO. 22	-	-	-	-	1"
+              placeholder="01004	BUDI SANTOSO	JL. SUNGAI BERINGIN NO. 10	30000	-	-	30000	2&#10;01005	SITI AMINAH	JL. PELITA JAYA NO. 22	-	-	-	-	1"
               class="w-full p-3 rounded-xl border border-slate-300 focus:border-sky-600 outline-none text-xs font-mono"
             ></textarea>
           </div>
@@ -535,9 +536,7 @@
                 <th class="py-3.5 px-4 text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody id="admin-table-body" class="divide-y divide-slate-100">
-              <!-- Diisi via JavaScript -->
-            </tbody>
+            <tbody id="admin-table-body" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>
       </div>
@@ -604,7 +603,6 @@ WITH CHECK (true);</pre>
       'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
     ];
 
-    // Data awal demo jika Supabase belum dihubungkan
     const DEFAULT_CUSTOMERS = [
       {
         no_pdam: '01001',
@@ -620,10 +618,10 @@ WITH CHECK (true);</pre>
         no_pdam: '01002',
         nama_pelanggan: 'AHMAD SYARIFUDDIN',
         alamat: 'JL. KAYU JATI GG. MELATI NO. 05',
-        tagihan_air: 145000,
+        tagihan_air: 30000,
         non_air: 0,
-        denda: 5000,
-        jumlah: 150000,
+        denda: 0,
+        jumlah: 30000,
         jumlah_rekening: 2
       },
       {
@@ -641,7 +639,6 @@ WITH CHECK (true);</pre>
     let supabaseClient = null;
     let customersData = [];
 
-    // Parsing nilai nominal: jika "-" atau kosong/bukan angka maka 0
     function parseNominalValue(val) {
       if (val === undefined || val === null) return 0;
       const str = String(val).trim();
@@ -651,13 +648,11 @@ WITH CHECK (true);</pre>
       return Number.isNaN(parsed) ? 0 : parsed;
     }
 
-    // Format angka dengan pemisah koma ribuan (misal 30000 -> "30,000"; "-" -> "0")
     function formatAngkaKoma(angka) {
       const num = parseNominalValue(angka);
       return num.toLocaleString('en-US');
     }
 
-    // Format Rupiah dengan pemisah koma ribuan (misal 30000 -> "Rp 30,000"; "-" -> "Rp 0")
     function formatRupiah(angka) {
       return 'Rp ' + formatAngkaKoma(angka);
     }
@@ -666,7 +661,6 @@ WITH CHECK (true);</pre>
       inputEl.value = formatAngkaKoma(inputEl.value);
     }
 
-    // Ambil Tanggal Update Harian (default: hari ini)
     function getUpdateDateObj() {
       const savedDate = localStorage.getItem('pdam_update_date');
       if (savedDate) {
@@ -687,8 +681,8 @@ WITH CHECK (true);</pre>
 
     // LOGIKA PERIODE REKENING:
     // - 0 atau 1 lembar = LUNAS
-    // - 2 lembar = 1 Lembar (Bulan Sebelumnya, misal Oktober)
-    // - 3 lembar = 2 Lembar (Oktober dan September), dst.
+    // - 2 lembar = 1 Lembar (Bulan Sebelumnya)
+    // - 3 lembar = 2 Lembar (2 bulan sebelumnya), dst.
     function formatPeriodeRekening(jumlahRekening) {
       const lembar = parseInt(jumlahRekening, 10) || 0;
       if (lembar <= 1) {
@@ -724,7 +718,59 @@ WITH CHECK (true);</pre>
       };
     }
 
-    // Terapkan Logo & Tanggal Update ke seluruh layar
+    // Menggabungkan beberapa record yang memiliki no_pdam sama menjadi 1 objek tagihan
+    function mergeRecordsByNoPdam(records) {
+      if (!records || records.length === 0) return null;
+      if (records.length === 1) {
+        return { ...records[0], _mergedCount: 1 };
+      }
+
+      const first = records[0];
+      const namaList = [...new Set(records.map(r => (r.nama_pelanggan || '').trim().toUpperCase()).filter(n => n && n !== '-'))];
+      const alamatList = [...new Set(records.map(r => (r.alamat || '').trim().toUpperCase()).filter(a => a && a !== '-'))];
+
+      let totalAir = 0;
+      let totalNonAir = 0;
+      let totalDenda = 0;
+      let totalJumlah = 0;
+      let totalLembar = 0;
+
+      records.forEach((rec, idx) => {
+        const air = parseNominalValue(rec.tagihan_air);
+        const nonAir = parseNominalValue(rec.non_air);
+        const denda = parseNominalValue(rec.denda);
+        const rawJml = parseNominalValue(rec.jumlah);
+        const jml = rawJml || (air + nonAir + denda);
+        const lbr = parseInt(rec.jumlah_rekening, 10) || 0;
+
+        totalAir += air;
+        totalNonAir += nonAir;
+        totalDenda += denda;
+        totalJumlah += jml;
+
+        // Jika baris ke-2 dst punya lembar >= 2, tambahkan jumlah bulan tunggakannya
+        if (idx === 0) {
+          totalLembar = lbr;
+        } else if (lbr > 1) {
+          totalLembar = (totalLembar > 1 ? totalLembar : 1) + (lbr - 1);
+        } else if (lbr === 1 && totalLembar === 0) {
+          totalLembar = 1;
+        }
+      });
+
+      return {
+        no_pdam: String(first.no_pdam).toUpperCase(),
+        nama_pelanggan: namaList.length > 0 ? namaList.join(' / ') : '-',
+        alamat: alamatList.length > 0 ? alamatList.join(' | ') : '-',
+        tagihan_air: totalAir,
+        non_air: totalNonAir,
+        denda: totalDenda,
+        jumlah: totalJumlah || (totalAir + totalNonAir + totalDenda),
+        jumlah_rekening: totalLembar,
+        _mergedCount: records.length
+      };
+    }
+
     function applyBranding() {
       const logoUrl = localStorage.getItem('pdam_logo_url') || '';
       const imgIds = ['splash-logo-img', 'search-logo-img', 'bill-logo-img'];
@@ -753,7 +799,6 @@ WITH CHECK (true);</pre>
       document.getElementById('cfg-logo-url').value = logoUrl;
     }
 
-    // Inisialisasi Koneksi Supabase
     function initSupabase() {
       const url = localStorage.getItem('pdam_sb_url') || '';
       const key = localStorage.getItem('pdam_sb_key') || '';
@@ -780,7 +825,6 @@ WITH CHECK (true);</pre>
       }
     }
 
-    // Navigasi Layar
     function hideAllScreens() {
       ['screen-splash', 'screen-search', 'screen-bill', 'screen-admin'].forEach(id => {
         document.getElementById(id).classList.add('hidden');
@@ -808,7 +852,7 @@ WITH CHECK (true);</pre>
       handleSearchBill(new Event('submit'));
     }
 
-    // Pencarian Tagihan Berdasarkan No. PDAM
+    // Pencarian Tagihan Berdasarkan No. PDAM (Menggabungkan jika ada >1 baris dengan no_pdam sama)
     async function handleSearchBill(e) {
       e.preventDefault();
       const inputVal = document.getElementById('input-no-pdam').value.trim().toUpperCase();
@@ -821,29 +865,29 @@ WITH CHECK (true);</pre>
       btn.innerHTML = '<span>MENCARI DATA TAGIHAN...</span>';
 
       try {
-        let record = null;
+        let matchedRows = [];
 
         if (supabaseClient) {
           const { data, error } = await supabaseClient
             .from('customers')
             .select('*')
-            .eq('no_pdam', inputVal)
-            .maybeSingle();
+            .eq('no_pdam', inputVal);
 
           if (error) throw error;
-          record = data;
+          matchedRows = data || [];
         } else {
           await loadLocalCustomers();
-          record = customersData.find(c => String(c.no_pdam).toUpperCase() === inputVal);
+          matchedRows = customersData.filter(c => String(c.no_pdam).toUpperCase() === inputVal);
         }
 
-        if (!record) {
+        if (!matchedRows || matchedRows.length === 0) {
           errBox.textContent = `Data tagihan untuk No. PDAM "${inputVal}" tidak ditemukan. Periksa kembali nomor Anda.`;
           errBox.classList.remove('hidden');
           return;
         }
 
-        renderBillSheet(record);
+        const mergedRecord = mergeRecordsByNoPdam(matchedRows);
+        renderBillSheet(mergedRecord);
       } catch (err) {
         errBox.textContent = 'Terjadi gangguan koneksi database: ' + (err.message || err);
         errBox.classList.remove('hidden');
@@ -858,7 +902,6 @@ WITH CHECK (true);</pre>
       }
     }
 
-    // Tampilkan Lembar Tagihan Pelanggan
     function renderBillSheet(data) {
       const periodeInfo = formatPeriodeRekening(data.jumlah_rekening);
       const isLunas = periodeInfo.isLunas;
@@ -868,6 +911,14 @@ WITH CHECK (true);</pre>
       const denda = isLunas ? 0 : parseNominalValue(data.denda);
       const rawJumlah = parseNominalValue(data.jumlah);
       const jumlah = isLunas ? 0 : (rawJumlah || (tagihanAir + nonAir + denda));
+
+      const mergedBadge = document.getElementById('bill-merged-badge');
+      if (data._mergedCount && data._mergedCount > 1) {
+        mergedBadge.textContent = `Gabungan ${data._mergedCount} baris data dengan No. PDAM ${data.no_pdam} dalam 1 lembar tagihan`;
+        mergedBadge.classList.remove('hidden');
+      } else {
+        mergedBadge.classList.add('hidden');
+      }
 
       document.getElementById('bill-tanggal-update').textContent = formatTanggalIndonesia(getUpdateDateObj());
       document.getElementById('bill-no-pdam').textContent = data.no_pdam;
@@ -1104,7 +1155,6 @@ WITH CHECK (true);</pre>
       }
     }
 
-    // Import Massal 8 Kolom (Tab / Titik Koma / Koma)
     async function handleBulkImport() {
       const rawText = document.getElementById('bulk-import-text').value.trim();
       if (!rawText) {
@@ -1113,14 +1163,13 @@ WITH CHECK (true);</pre>
       }
 
       const lines = rawText.split(/\r?\n/).filter(line => line.trim() !== '');
-      const recordsMap = new Map();
+      const groupedMap = new Map();
 
       lines.forEach(line => {
         const delimiter = line.includes('\t') ? '\t' : (line.includes(';') ? ';' : ',');
         const cols = line.split(delimiter).map(c => c.trim());
         if (cols.length < 3) return;
 
-        // Lewati baris header jika ada
         const firstCol = cols[0].toUpperCase();
         if (firstCol === 'NO. PDAM' || firstCol === 'NO PDAM' || firstCol === 'NO_PDAM') return;
 
@@ -1137,7 +1186,7 @@ WITH CHECK (true);</pre>
           ? parseInt(parseNominalValue(cols[7]), 10)
           : 1;
 
-        recordsMap.set(no_pdam, {
+        const rowObj = {
           no_pdam,
           nama_pelanggan,
           alamat,
@@ -1146,10 +1195,29 @@ WITH CHECK (true);</pre>
           denda,
           jumlah,
           jumlah_rekening
-        });
+        };
+
+        if (!groupedMap.has(no_pdam)) {
+          groupedMap.set(no_pdam, [rowObj]);
+        } else {
+          groupedMap.get(no_pdam).push(rowObj);
+        }
       });
 
-      const records = Array.from(recordsMap.values());
+      const records = Array.from(groupedMap.values()).map(list => {
+        const merged = mergeRecordsByNoPdam(list);
+        return {
+          no_pdam: merged.no_pdam,
+          nama_pelanggan: merged.nama_pelanggan,
+          alamat: merged.alamat,
+          tagihan_air: merged.tagihan_air,
+          non_air: merged.non_air,
+          denda: merged.denda,
+          jumlah: merged.jumlah,
+          jumlah_rekening: merged.jumlah_rekening
+        };
+      });
+
       if (records.length === 0) {
         alert('Format data tidak valid. Pastikan urutan 8 kolom sesuai panduan.');
         return;
@@ -1172,13 +1240,12 @@ WITH CHECK (true);</pre>
 
         document.getElementById('bulk-import-text').value = '';
         await loadCustomers();
-        alert(`Berhasil mengimpor ${records.length} data tagihan pelanggan!`);
+        alert(`Berhasil memproses & menggabungkan menjadi ${records.length} data tagihan pelanggan!`);
       } catch (err) {
         alert('Gagal melakukan import massal: ' + (err.message || err));
       }
     }
 
-    // Render Tabel Admin
     function renderAdminTable() {
       const tbody = document.getElementById('admin-table-body');
       const keyword = (document.getElementById('admin-filter-input').value || '').trim().toUpperCase();
@@ -1231,7 +1298,6 @@ WITH CHECK (true);</pre>
       }).join('');
     }
 
-    // Jalankan Inisialisasi Awal
     window.addEventListener('DOMContentLoaded', () => {
       applyBranding();
       initSupabase();
