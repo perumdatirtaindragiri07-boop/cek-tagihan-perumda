@@ -33,116 +33,121 @@
     }
 
     /* =========================================================
-       FORMAT CETAK STRUK BELANJA (80mm THERMAL)
+       FORMAT CETAK KERTAS A4 (PORTRAIT)
     ========================================================== */
     @media print {
       @page {
-        size: 80mm auto;
-        margin: 2.5mm;
+        size: A4 portrait;
+        margin: 15mm;
       }
       html, body {
-        width: 75mm !important;
+        width: 100% !important;
         min-height: auto !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
-        color: #000000 !important;
-        font-family: 'Courier New', Courier, monospace, sans-serif !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
+        color: #1e293b !important;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
       .no-print {
         display: none !important;
       }
       #screen-bill {
-        display: block !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: flex-start !important;
         min-height: auto !important;
         padding: 0 !important;
         margin: 0 !important;
       }
       #bill-paper {
-        width: 75mm !important;
-        max-width: 75mm !important;
-        margin: 0 !important;
-        border: none !important;
-        border-radius: 0 !important;
+        width: 100% !important;
+        max-width: 180mm !important;
+        margin: 0 auto !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 14px !important;
         box-shadow: none !important;
-        overflow: visible !important;
+        overflow: hidden !important;
       }
-      #bill-paper .pdam-gradient,
-      #bill-paper [class*="bg-gradient-to-r"] {
-        background: #ffffff !important;
-        color: #000000 !important;
-        padding: 4px 2px !important;
-        border-bottom: 1px dashed #000000 !important;
+      #bill-header {
+        padding: 20px 28px !important;
       }
-      #bill-paper h1 {
-        font-size: 12px !important;
-        line-height: 1.2 !important;
-        color: #000000 !important;
-        text-shadow: none !important;
+      #bill-header-inner {
+        flex-direction: row !important;
+        text-align: left !important;
+        gap: 20px !important;
       }
-      #bill-paper p,
-      #bill-paper span,
-      #bill-paper div {
-        color: #000000 !important;
-        text-shadow: none !important;
-      }
-      #bill-paper .p-5,
-      #bill-paper .sm\:p-7,
-      #bill-paper .p-4 {
-        padding: 4px 2px !important;
-      }
-      #bill-paper .space-y-5 > :not([hidden]) ~ :not([hidden]),
-      #bill-paper .space-y-2\.5 > :not([hidden]) ~ :not([hidden]),
-      #bill-paper .gap-3 {
-        margin-top: 3px !important;
-        gap: 2px !important;
-      }
-      #bill-paper .text-sm,
-      #bill-paper .text-xs,
-      #bill-paper .text-\[13px\],
-      #bill-paper .text-\[11px\] {
-        font-size: 9.5px !important;
-        line-height: 1.3 !important;
-      }
-      #bill-paper .text-2xl,
-      #bill-paper .sm\:text-3xl,
-      #bill-jumlah {
-        font-size: 13px !important;
-        line-height: 1.2 !important;
-      }
-      #bill-total-box {
-        background: #ffffff !important;
-        border-top: 1px dashed #000000 !important;
-        border-bottom: 1px dashed #000000 !important;
-        border-radius: 0 !important;
-        box-shadow: none !important;
-        padding: 5px 2px !important;
-      }
-      #bill-paper .bg-amber-50,
-      #bill-paper .bg-sky-50,
-      #bill-paper .bg-slate-50\/80,
-      #bill-paper .bg-emerald-100,
-      #bill-paper .bg-amber-100 {
-        background: #ffffff !important;
-        border-color: #000000 !important;
-        border-radius: 0 !important;
-      }
-      #bill-paper .w-16,
-      #bill-paper .sm\:w-20,
-      #bill-paper .h-16,
-      #bill-paper .sm\:h-20 {
-        width: 34px !important;
-        height: 34px !important;
-        padding: 2px !important;
-        border: 1px solid #000000 !important;
-        box-shadow: none !important;
+      #bill-logo-wrap {
+        width: 72px !important;
+        height: 72px !important;
+        padding: 8px !important;
       }
       #bill-logo-svg,
       #bill-logo-img {
-        width: 26px !important;
-        height: 26px !important;
+        width: 54px !important;
+        height: 54px !important;
+      }
+      #bill-header p.text-\[10px\] {
+        font-size: 11px !important;
+      }
+      #bill-header h1 {
+        font-size: 22px !important;
+        line-height: 1.25 !important;
+      }
+      #bill-header p.text-\[11px\] {
+        font-size: 12.5px !important;
+      }
+      #bill-sub-header {
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        padding: 12px 28px !important;
+        font-size: 13px !important;
+      }
+      #bill-body {
+        padding: 24px 28px !important;
+      }
+      #bill-body > * + * {
+        margin-top: 20px !important;
+      }
+      #bill-info-box {
+        padding: 18px 20px !important;
+        font-size: 13.5px !important;
+        gap: 10px !important;
+      }
+      #bill-info-box > div {
+        padding-bottom: 8px !important;
+      }
+      #bill-alamat {
+        max-width: 420px !important;
+      }
+      #bill-rincian-box {
+        font-size: 14px !important;
+      }
+      #bill-rincian-box > div {
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+      }
+      #bill-total-box {
+        padding: 18px 24px !important;
+        box-shadow: none !important;
+      }
+      #bill-total-box p:first-child {
+        font-size: 13px !important;
+      }
+      #bill-total-box p:last-child {
+        font-size: 12px !important;
+      }
+      #bill-jumlah {
+        font-size: 26px !important;
+      }
+      #bill-footer-note {
+        padding: 16px 20px !important;
+      }
+      #bill-footer-note p {
+        font-size: 12px !important;
+        line-height: 1.5 !important;
       }
     }
   </style>
@@ -279,17 +284,17 @@
   </section>
 
   <!-- =========================================================
-       LAYAR 3: LEMBAR HASIL TAGIHAN PELANGGAN (UKURAN STRUK)
+       LAYAR 3: LEMBAR HASIL TAGIHAN PELANGGAN (FORMAT A4)
   ========================================================== -->
   <section id="screen-bill" class="hidden min-h-screen py-6 px-4 sm:py-10 flex flex-col items-center justify-center">
-    <div id="bill-paper" class="w-full max-w-sm bg-white rounded-2xl pdam-card-shadow border border-sky-200 overflow-hidden">
+    <div id="bill-paper" class="w-full max-w-xl bg-white rounded-2xl pdam-card-shadow border border-sky-200 overflow-hidden">
 
       <!-- KOP SURAT INSTANSI -->
-      <div class="bg-gradient-to-r from-[#004481] via-[#0066b3] to-[#0088cc] p-4 sm:p-5 text-white border-b-4 border-amber-400">
-        <div class="flex flex-col items-center gap-2 text-center">
-          <div class="w-14 h-14 rounded-full bg-white p-2 shadow-lg flex-shrink-0 flex items-center justify-center">
+      <div id="bill-header" class="bg-gradient-to-r from-[#004481] via-[#0066b3] to-[#0088cc] p-5 sm:p-6 text-white border-b-4 border-amber-400">
+        <div id="bill-header-inner" class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 text-center sm:text-left">
+          <div id="bill-logo-wrap" class="w-16 h-16 rounded-full bg-white p-2 shadow-lg flex-shrink-0 flex items-center justify-center">
             <img id="bill-logo-img" src="" alt="Logo Instansi" class="hidden w-full h-full object-contain rounded-full" />
-            <svg id="bill-logo-svg" viewBox="0 0 120 120" class="w-10 h-10" fill="none">
+            <svg id="bill-logo-svg" viewBox="0 0 120 120" class="w-11 h-11" fill="none">
               <path d="M60 12C60 12 22 54.5 22 79C22 99.9868 39.0132 114 60 114C80.9868 114 98 99.9868 98 79C98 54.5 60 12 60 12Z" fill="#0066b3"/>
               <path d="M35 82C43 75 53 75 60 82C67 89 77 89 85 82" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
               <path d="M40 94C47 89 54 89 60 94C66 99 73 99 80 94" stroke="#bae6fd" stroke-width="4" stroke-linecap="round"/>
@@ -297,89 +302,89 @@
           </div>
           <div class="w-full">
             <p class="text-[10px] font-bold tracking-widest uppercase text-sky-200">Perusahaan Umum Daerah Air Minum</p>
-            <h1 class="text-lg font-extrabold tracking-wide text-white drop-shadow-sm mt-0.5">
+            <h1 class="text-lg sm:text-xl font-extrabold tracking-wide text-white drop-shadow-sm mt-0.5">
               PERUMDA TIRTA INDRAGIRI
             </h1>
-            <p class="text-[11px] text-sky-100 mt-0.5">Jl. M. Boya No. 07 Tembilahan - Kab. Inhil</p>
+            <p class="text-[11px] sm:text-xs text-sky-100 mt-0.5">Jl. M. Boya No. 07 Tembilahan - Kab. Inhil</p>
           </div>
         </div>
       </div>
 
       <!-- JUDUL & TANGGAL UPDATE HARIAN -->
-      <div class="bg-sky-50 px-4 py-2.5 border-b border-sky-100 flex flex-col items-center justify-center gap-0.5 text-[11px] text-center">
-        <span class="font-extrabold text-[#00529b] uppercase tracking-wider">STRUK INFORMASI TAGIHAN AIR</span>
+      <div id="bill-sub-header" class="bg-sky-50 px-5 py-3 border-b border-sky-100 flex flex-col sm:flex-row items-center justify-between gap-1 text-xs text-center sm:text-left">
+        <span class="font-extrabold text-[#00529b] uppercase tracking-wider">LEMBAR INFORMASI TAGIHAN AIR</span>
         <span class="text-slate-600 font-semibold">
           Update: <strong id="bill-tanggal-update" class="text-[#00529b]">-</strong>
         </span>
       </div>
 
       <!-- ISI LEMBAR TAGIHAN -->
-      <div class="p-4 space-y-4">
-        <div id="bill-merged-badge" class="hidden px-3 py-1.5 rounded-lg bg-sky-50 border border-sky-200 text-[11px] font-bold text-[#00529b] text-center"></div>
+      <div id="bill-body" class="p-5 sm:p-6 space-y-4">
+        <div id="bill-merged-badge" class="hidden px-3 py-1.5 rounded-lg bg-sky-50 border border-sky-200 text-xs font-bold text-[#00529b] text-center"></div>
 
         <!-- Identitas Pelanggan & Periode -->
-        <div class="grid grid-cols-1 gap-2 bg-slate-50/80 p-3 rounded-xl border border-slate-200/80 text-xs">
-          <div class="flex justify-between items-start gap-2 border-b border-slate-200/70 pb-1.5">
+        <div id="bill-info-box" class="grid grid-cols-1 gap-2.5 bg-slate-50/80 p-4 rounded-xl border border-slate-200/80 text-xs sm:text-sm">
+          <div class="flex justify-between items-start gap-3 border-b border-slate-200/70 pb-2">
             <span class="text-slate-500 font-medium">No. PDAM</span>
             <span id="bill-no-pdam" class="font-extrabold text-slate-900 text-right tracking-wider">-</span>
           </div>
-          <div class="flex justify-between items-start gap-2 border-b border-slate-200/70 pb-1.5">
+          <div class="flex justify-between items-start gap-3 border-b border-slate-200/70 pb-2">
             <span class="text-slate-500 font-medium">Nama</span>
             <span id="bill-nama-pelanggan" class="font-extrabold text-slate-900 text-right uppercase">-</span>
           </div>
-          <div class="flex justify-between items-start gap-2 border-b border-slate-200/70 pb-1.5">
+          <div class="flex justify-between items-start gap-3 border-b border-slate-200/70 pb-2">
             <span class="text-slate-500 font-medium">Alamat</span>
-            <span id="bill-alamat" class="font-semibold text-slate-800 text-right max-w-[180px]">-</span>
+            <span id="bill-alamat" class="font-semibold text-slate-800 text-right max-w-[260px] sm:max-w-[340px]">-</span>
           </div>
-          <div class="flex justify-between items-start gap-2 pt-0.5">
+          <div class="flex justify-between items-start gap-3 pt-0.5">
             <span class="text-slate-500 font-medium">Periode</span>
             <span id="bill-periode" class="text-right font-bold">-</span>
           </div>
         </div>
 
         <!-- Rincian Tagihan -->
-        <div class="space-y-1.5 text-xs px-0.5">
-          <div class="flex justify-between items-center py-1 border-b border-dashed border-slate-200">
+        <div id="bill-rincian-box" class="space-y-2 text-xs sm:text-sm px-1">
+          <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-200">
             <span class="text-slate-600 font-medium">Tagihan Air</span>
             <span id="bill-tagihan-air" class="font-bold text-slate-800">Rp 0</span>
           </div>
-          <div class="flex justify-between items-center py-1 border-b border-dashed border-slate-200">
+          <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-200">
             <span class="text-slate-600 font-medium">Non Air</span>
             <span id="bill-non-air" class="font-bold text-slate-800">Rp 0</span>
           </div>
-          <div class="flex justify-between items-center py-1 border-b border-dashed border-slate-200">
+          <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-200">
             <span class="text-slate-600 font-medium">Denda</span>
             <span id="bill-denda" class="font-bold text-rose-600">Rp 0</span>
           </div>
         </div>
 
         <!-- Kotak Jumlah Tagihan Menonjol -->
-        <div id="bill-total-box" class="rounded-xl bg-gradient-to-r from-[#004e92] to-[#0077cc] p-3.5 text-white shadow-md flex items-center justify-between gap-2">
+        <div id="bill-total-box" class="rounded-xl bg-gradient-to-r from-[#004e92] to-[#0077cc] p-4 text-white shadow-md flex items-center justify-between gap-2">
           <div class="text-left">
-            <p class="text-[11px] font-bold uppercase tracking-wider text-sky-200">Jumlah (Rp)</p>
-            <p class="text-[10px] text-sky-100">Total Tagihan</p>
+            <p class="text-xs font-bold uppercase tracking-wider text-sky-200">Jumlah (Rp)</p>
+            <p class="text-[11px] text-sky-100">Total Tagihan</p>
           </div>
-          <div id="bill-jumlah" class="text-lg font-extrabold tracking-tight text-amber-300 drop-shadow">
+          <div id="bill-jumlah" class="text-xl sm:text-2xl font-extrabold tracking-tight text-amber-300 drop-shadow">
             Rp 0
           </div>
         </div>
 
         <!-- Catatan Paling Bawah -->
-        <div class="p-3 rounded-xl bg-amber-50 border border-amber-300 text-center">
-          <p class="text-[11px] font-extrabold text-amber-900 leading-snug uppercase">
+        <div id="bill-footer-note" class="p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-center">
+          <p class="text-xs font-extrabold text-amber-900 leading-snug uppercase">
             "INI HANYA UNTUK MENGETAHUI JUMLAH TAGIHAN, APABILA ANDA TELAH MELAKUKAN PEMBAYARAN MAKA TAGIHAN INI DIABAIKAN SAJA"
           </p>
         </div>
 
         <!-- Tombol Aksi -->
-        <div class="no-print pt-1 flex flex-col gap-2">
-          <button onclick="window.print()" class="w-full py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow transition flex items-center justify-center gap-2 cursor-pointer">
+        <div class="no-print pt-1 flex flex-col sm:flex-row gap-2.5">
+          <button onclick="window.print()" class="flex-1 py-3 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs sm:text-sm shadow transition flex items-center justify-center gap-2 cursor-pointer">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
             </svg>
-            <span>Cetak Struk / Simpan PDF</span>
+            <span>Cetak A4 / Simpan PDF</span>
           </button>
-          <button onclick="backToSearch()" class="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer">
+          <button onclick="backToSearch()" class="flex-1 py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2 cursor-pointer">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
@@ -1070,9 +1075,9 @@ WITH CHECK (true);</pre>
 
       const periodeEl = document.getElementById('bill-periode');
       if (isLunas) {
-        periodeEl.innerHTML = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-extrabold">✓ ${periodeInfo.text}</span>`;
+        periodeEl.innerHTML = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold">✓ ${periodeInfo.text}</span>`;
       } else {
-        periodeEl.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[11px] font-extrabold">${periodeInfo.text}</span>`;
+        periodeEl.innerHTML = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-xs font-extrabold">${periodeInfo.text}</span>`;
       }
 
       document.getElementById('bill-tagihan-air').textContent = formatRupiah(tagihanAir);
